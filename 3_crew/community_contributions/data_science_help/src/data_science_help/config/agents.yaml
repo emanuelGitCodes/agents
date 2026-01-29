@@ -1,11 +1,11 @@
 design_agent:
   role: >
     System Designer
-  goal: > 
+  goal: >
     Produce a precise, human-readable system design in Markdown for all modules/classes/functions.
   backstory: >
     Experienced data/ML system designer. Writes clear specs, no code.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 analyst_agent:
   role: >
@@ -17,7 +17,7 @@ analyst_agent:
     Providing first recommendations for the cleanung process.
   backstory: >
     You are a careful data profiler who writes reproducible, inspection-friendly outputs.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 
 clean_agent:
@@ -27,7 +27,7 @@ clean_agent:
     Apply minimal, reversible cleaning aligned with the audit; persist cleaned CSV + JSON ref; generate/update cleaning module.
   backstory: >
     You document every change and keep cleaning steps reproducible and minimal-risk.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 
 visualization_agent:
@@ -37,7 +37,7 @@ visualization_agent:
     Generate standard EDA figures and a VisualSummary JSON; generate/update visualization module.
   backstory: >
     You create minimal, informative plots and save them to disk, not inline.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 
 controller_agent:
@@ -48,7 +48,7 @@ controller_agent:
     Emit StepAudit (passed|retry|failed) with ≤3 issues, 1 recommendation, and evidence.
   backstory: >
     You prevent regressions, enforce contracts, and keep pipelines reproducible.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 # --- UI Crew Agents ---
 
@@ -65,8 +65,8 @@ tester_agent:
   role: >
     UI Smoke Tester for compile/import/contracts.
   goal: >
-    Compile, import, and sanity-check the UI module. 
+    Compile, import, and sanity-check the UI module.
     Produce a clear StepAudit with actionable issues on failure.
   backstory: >
     You quickly detect syntax/import/contract problems before runtime.
-  llm: openai/gpt-4o-mini 
+  llm: openai/gpt-5-mini

@@ -1,10 +1,15 @@
 from pydantic import BaseModel, Field
 from agents import Agent  # uses same Agent framework as your other agents
 
+
 class FamilyBiblePlayPlan(BaseModel):
     title: str = Field(description="Fun, warm title for the family activity.")
-    bible_verse: str = Field(description="The verse text itself, in simple translation.")
-    verse_reference: str = Field(description="Where the verse is found, e.g. Luke 2:11.")
+    bible_verse: str = Field(
+        description="The verse text itself, in simple translation."
+    )
+    verse_reference: str = Field(
+        description="Where the verse is found, e.g. Luke 2:11."
+    )
     story_summary: str = Field(
         description="A short, simple, age-appropriate summary of the Bible story connected to the verse."
     )
@@ -26,6 +31,7 @@ class FamilyBiblePlayPlan(BaseModel):
     suggested_start_time_text: str = Field(
         description="Suggested time phrased naturally, e.g. 'Tonight after dinner'."
     )
+
 
 JOYFUL_KIDS_INSTRUCTIONS = """
 You are the Joyful Kids Bible Agent.
@@ -60,6 +66,6 @@ Always keep it playful and full of love.
 joyful_kids_bible_agent = Agent(
     name="JoyfulKidsBibleAgent",
     instructions=JOYFUL_KIDS_INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=FamilyBiblePlayPlan,
 )

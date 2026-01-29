@@ -15,30 +15,47 @@ from datetime import datetime
 
 load_dotenv(override=True)
 
+
 class State(TypedDict):
     """Simplified state with essential fields only"""
+
     messages: Annotated[List[Any], add_messages]
     success_criteria: str
     success_criteria_met: bool
     user_input_needed: bool
-    
+
     # Task coordination
     task_plan: Dict[str, Any]  # Contains research_tasks, action_tasks, strategy
-    agent_status: Dict[str, str]  # Track completion: {research: "pending/complete/error"}
+    agent_status: Dict[
+        str, str
+    ]  # Track completion: {research: "pending/complete/error"}
+
 
 class CoordinationPlan(BaseModel):
     """Single definition for coordinator llm's output"""
-    research_tasks: List[str] = Field(default_factory=list, description="Information gathering tasks")
-    action_tasks: List[str] = Field(default_factory=list, description="Execution/creation tasks") 
-    requires_both: bool = Field(default=False, description="Whether both agents are needed")
+
+    research_tasks: List[str] = Field(
+        default_factory=list, description="Information gathering tasks"
+    )
+    action_tasks: List[str] = Field(
+        default_factory=list, description="Execution/creation tasks"
+    )
+    requires_both: bool = Field(
+        default=False, description="Whether both agents are needed"
+    )
     strategy: str = Field(description="Overall approach")
-    direct_response: Optional[str] = Field(default=None, description="Direct response if no agents needed")
+    direct_response: Optional[str] = Field(
+        default=None, description="Direct response if no agents needed"
+    )
+
 
 class EvaluatorOutput(BaseModel):
     """Evaluator structured output"""
+
     response: str = Field(description="Final response to user")
     success_criteria_met: bool = Field(description="Whether criteria were met")
     user_input_needed: bool = Field(description="If more input is needed")
+
 
 class Sidekick:
     def __init__(self):
@@ -58,19 +75,19 @@ class Sidekick:
         # Get tools
         self.research_tools = await get_research_tools()
         self.action_tools = await get_action_tools()
-        
+
         # Set up browser tools
         browser_tools, self.browser, self.playwright = await playwright_tools()
         self.action_tools += browser_tools
-        
+
         # Initialize LLMs (single model for consistency)
-        base_llm = ChatOpenAI(model="gpt-4o-mini")
-        
+        base_llm = ChatOpenAI(model="gpt-5-mini")
+
         self.research_llm = base_llm.bind_tools(self.research_tools)
         self.action_llm = base_llm.bind_tools(self.action_tools)
         self.coordinator_llm = base_llm.with_structured_output(CoordinationPlan)
         self.evaluator_llm = base_llm.with_structured_output(EvaluatorOutput)
-        
+
         await self.build_graph()
 
     def coordinator_agent(self, state: State) -> Dict[str, Any]:
@@ -82,12 +99,12 @@ class Sidekick:
 
 First, decide if you can respond directly (greetings, thanks, capability questions, clarifications). Otherwise, delegate to agents based on the task.
 
-RESEARCH AGENT (info gathering): web search, Wikipedia, read files – cannot run code or edit files  
+RESEARCH AGENT (info gathering): web search, Wikipedia, read files – cannot run code or edit files
 ACTION AGENT (execution): run Python, modify files, send notifications – cannot search web or read Wikipedia
 
 CRITICAL: If the request is vague, ambiguous, or missing key details, ask clarifying questions before assigning tasks.
 
-Analyze this request: "{user_request}"  
+Analyze this request: "{user_request}"
 Success criteria: "{success_criteria}"
 
 Output a coordination plan with:
@@ -97,40 +114,45 @@ Output a coordination plan with:
 4. How they should interact
 """
 
+        result = self.coordinator_llm.invoke(
+            [
+                SystemMessage(content=system_message),
+                HumanMessage(
+                    content=f"Request: {user_request}\nSuccess criteria: {success_criteria}"
+                ),
+            ]
+        )
 
-        result = self.coordinator_llm.invoke([
-            SystemMessage(content=system_message),
-            HumanMessage(content=f"Request: {user_request}\nSuccess criteria: {success_criteria}")
-        ])
-        
         # Initialize agent status
         agent_status = {}
         task_plan = {
             "research_tasks": result.research_tasks,
             "action_tasks": result.action_tasks,
             "strategy": result.strategy,
-            "requires_both": result.requires_both
+            "requires_both": result.requires_both,
         }
-        
+
         # Set initial agent status based on tasks
         if result.research_tasks:
             agent_status["research"] = "pending"
         if result.action_tasks:
             agent_status["action"] = "pending"
-        
+
         # Direct response path
-        if result.direct_response and not (result.research_tasks or result.action_tasks):
+        if result.direct_response and not (
+            result.research_tasks or result.action_tasks
+        ):
             return {
                 "task_plan": task_plan,
                 "agent_status": agent_status,
-                "messages": [AIMessage(content=result.direct_response)]
+                "messages": [AIMessage(content=result.direct_response)],
             }
-        
+
         # Delegation path
         return {
             "task_plan": task_plan,
             "agent_status": agent_status,
-            "messages": [AIMessage(content=f"Plan: {result.strategy}")]
+            "messages": [AIMessage(content=f"Plan: {result.strategy}")],
         }
 
     def research_agent(self, state: State) -> Dict[str, Any]:
@@ -139,15 +161,15 @@ Output a coordination plan with:
             task_plan = state.get("task_plan", {})
             research_tasks = task_plan.get("research_tasks", [])
             success_criteria = state.get("success_criteria")
-            
+
             if not research_tasks:
                 agent_status = state.get("agent_status", {})
                 agent_status["research"] = "skipped"
                 return {
                     "agent_status": agent_status,
-                    "messages": [AIMessage(content="No research needed")]
+                    "messages": [AIMessage(content="No research needed")],
                 }
-            
+
             system_message = f"""You are a Research Agent specialized in information gathering ONLY.
 
 YOUR ROLE: Gather information and pass it to the Action Agent. You CANNOT create files or execute code.
@@ -171,30 +193,30 @@ CRITICAL RULES:
 
 Current time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
-IMPORTANT: Once you've gathered the information for all tasks, summarize it and STOP. 
+IMPORTANT: Once you've gathered the information for all tasks, summarize it and STOP.
 The Action Agent will use your findings to create any required files or reports.
 """
 
             messages = [SystemMessage(content=system_message)] + state["messages"]
             response = self.research_llm.invoke(messages)
-            
+
             result = {"messages": [response]}
-            
+
             # Check if complete (no tool calls)
             if not (hasattr(response, "tool_calls") and response.tool_calls):
                 agent_status = state.get("agent_status", {})
                 agent_status["research"] = "complete"
                 result["agent_status"] = agent_status
-            
+
             return result
-            
+
         except Exception as e:
             agent_status = state.get("agent_status", {})
             agent_status["research"] = "error"
             return {
                 "agent_status": agent_status,
                 "messages": [AIMessage(content=f"Research error: {str(e)}")],
-                "user_input_needed": True
+                "user_input_needed": True,
             }
 
     def action_agent(self, state: State) -> Dict[str, Any]:
@@ -203,24 +225,27 @@ The Action Agent will use your findings to create any required files or reports.
             task_plan = state.get("task_plan", {})
             action_tasks = task_plan.get("action_tasks", [])
             success_criteria = state.get("success_criteria")
-            
+
             if not action_tasks:
                 agent_status = state.get("agent_status", {})
                 agent_status["action"] = "skipped"
                 return {
                     "agent_status": agent_status,
-                    "messages": [AIMessage(content="No actions needed")]
+                    "messages": [AIMessage(content="No actions needed")],
                 }
-            
+
             # Get research results if available
             research_content = ""
             if state.get("agent_status", {}).get("research") == "complete":
                 # Find research agent's findings
                 for msg in reversed(state["messages"]):
-                    if isinstance(msg, AIMessage) and any(word in msg.content.lower() for word in ["research", "findings", "gathered", "information"]):
+                    if isinstance(msg, AIMessage) and any(
+                        word in msg.content.lower()
+                        for word in ["research", "findings", "gathered", "information"]
+                    ):
                         research_content = msg.content
                         break
-            
+
             system_message = f"""You are an Action Agent specialized in executing tasks and creating deliverables.
 
 YOUR TASKS:
@@ -249,27 +274,26 @@ YOUR MISSION:
 IMPORTANT: The Research Agent has already gathered the information. Your job is to USE that information to create the deliverables.
 """
 
-
             messages = [SystemMessage(content=system_message)] + state["messages"]
             response = self.action_llm.invoke(messages)
-            
+
             result = {"messages": [response]}
-            
+
             # Check if complete (no tool calls)
             if not (hasattr(response, "tool_calls") and response.tool_calls):
                 agent_status = state.get("agent_status", {})
                 agent_status["action"] = "complete"
                 result["agent_status"] = agent_status
-            
+
             return result
-            
+
         except Exception as e:
             agent_status = state.get("agent_status", {})
             agent_status["action"] = "error"
             return {
                 "agent_status": agent_status,
                 "messages": [AIMessage(content=f"Action error: {str(e)}")],
-                "user_input_needed": True
+                "user_input_needed": True,
             }
 
     def evaluator(self, state: State) -> Dict[str, Any]:
@@ -277,13 +301,13 @@ IMPORTANT: The Research Agent has already gathered the information. Your job is 
         task_plan = state.get("task_plan", {})
         agent_status = state.get("agent_status", {})
         success_criteria = state["success_criteria"]
-        
+
         # Gather agent results
         agent_results = []
         for msg in state["messages"][-5:]:  # Check recent messages
             if isinstance(msg, AIMessage):
                 agent_results.append(msg.content)
-        
+
         system_message = f"""You are an Evaluator/Synthesizer Agent that creates the final response.
 
 ORIGINAL REQUEST: {state['messages'][0].content if state['messages'] else ''}
@@ -304,23 +328,24 @@ GUIDELINES:
 Provide a clear, professional response.
 """
 
+        result = self.evaluator_llm.invoke(
+            [
+                SystemMessage(content=system_message),
+                HumanMessage(content="Create final response"),
+            ]
+        )
 
-        result = self.evaluator_llm.invoke([
-            SystemMessage(content=system_message),
-            HumanMessage(content="Create final response")
-        ])
-        
         return {
             "messages": [AIMessage(content=result.response)],
             "success_criteria_met": result.success_criteria_met,
-            "user_input_needed": result.user_input_needed
+            "user_input_needed": result.user_input_needed,
         }
 
     # Simplified routing functions
     def coordinator_router(self, state: State) -> str:
         """Route from coordinator based on task plan"""
         task_plan = state.get("task_plan", {})
-        
+
         if task_plan.get("research_tasks"):
             return "research_agent"
         elif task_plan.get("action_tasks"):
@@ -331,14 +356,14 @@ Provide a clear, professional response.
     def research_router(self, state: State) -> str:
         """Route from research agent"""
         last_message = state["messages"][-1]
-        
+
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             return "research_tools"
-        
+
         # Research complete - check if action needed
         task_plan = state.get("task_plan", {})
         agent_status = state.get("agent_status", {})
-        
+
         if task_plan.get("action_tasks") and agent_status.get("action") == "pending":
             return "action_agent"
         else:
@@ -347,7 +372,7 @@ Provide a clear, professional response.
     def action_router(self, state: State) -> str:
         """Route from action agent"""
         last_message = state["messages"][-1]
-        
+
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             return "action_tools"
         else:
@@ -363,7 +388,7 @@ Provide a clear, professional response.
     async def build_graph(self):
         """Construct the agent graph"""
         graph = StateGraph(State)
-        
+
         # Add nodes
         graph.add_node("coordinator", self.coordinator_agent)
         graph.add_node("research_agent", self.research_agent)
@@ -371,27 +396,27 @@ Provide a clear, professional response.
         graph.add_node("evaluator", self.evaluator)
         graph.add_node("research_tools", ToolNode(self.research_tools))
         graph.add_node("action_tools", ToolNode(self.action_tools))
-        
+
         # Add edges
         graph.add_edge(START, "coordinator")
         graph.add_edge("research_tools", "research_agent")
         graph.add_edge("action_tools", "action_agent")
-        
+
         # Add conditional edges
         graph.add_conditional_edges("coordinator", self.coordinator_router)
         graph.add_conditional_edges("research_agent", self.research_router)
         graph.add_conditional_edges("action_agent", self.action_router)
         graph.add_conditional_edges("evaluator", self.evaluator_router)
-        
+
         self.graph = graph.compile(checkpointer=self.memory)
 
     async def run_superstep(self, message, success_criteria, history, thread_id=None):
         """Execute one conversation turn"""
         if thread_id is None:
             thread_id = str(uuid.uuid4())
-        
+
         config = {"configurable": {"thread_id": thread_id}}
-        
+
         # Convert history to messages
         messages = []
         for msg in history:
@@ -399,7 +424,7 @@ Provide a clear, professional response.
                 messages.append(HumanMessage(content=msg["content"]))
             else:
                 messages.append(AIMessage(content=msg["content"]))
-        
+
         # Initialize state
         state = {
             "messages": messages + [HumanMessage(content=message)],
@@ -407,16 +432,16 @@ Provide a clear, professional response.
             "success_criteria_met": False,
             "user_input_needed": False,
             "task_plan": {},
-            "agent_status": {}
+            "agent_status": {},
         }
-        
+
         # Run the graph
         result = await self.graph.ainvoke(state, config=config)
-        
+
         # Prepare response
         user = {"role": "user", "content": message}
         reply = {"role": "assistant", "content": result["messages"][-1].content}
-        
+
         return history + [user, reply], thread_id
 
     async def cleanup(self):

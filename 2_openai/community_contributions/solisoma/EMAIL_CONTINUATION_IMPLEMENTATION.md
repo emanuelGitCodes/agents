@@ -40,7 +40,7 @@ result = Runner.run(planner_agent, input=messages)
 # Step 1: Create individual agents
 answer_agent = Agent(...)              # New: for quick questions
 question_generation_agent = Agent(...) # Reuse from notebook
-search_agent = Agent(...)              # Reuse from notebook  
+search_agent = Agent(...)              # Reuse from notebook
 writer_agent = Agent(...)              # Reuse from notebook
 
 # Step 2: Pass agents as tools to coordinator
@@ -85,17 +85,17 @@ reply_to = "reply@yourdomain.com"  # So replies come to webhook
 @app.post("/webhook/email")
 async def handle_inbound_email(request: Request):
     form_data = await request.form()
-    
+
     from_email = form_data.get("from")    # "User <user@email.com>"
     text_body = form_data.get("text")      # Email body
-    
+
     # Extract clean data
     user_email = extract_email(from_email)  # "user@email.com"
     clean_content = remove_quoted_text(text_body)  # Only new content
-    
+
     # Process with agent
     await process_with_agent(user_email, clean_content)
-    
+
     return {"status": "received"}
 ```
 
@@ -125,7 +125,7 @@ answer_agent = Agent(
     Keep response brief (2-3 paragraphs) for email.
     Be friendly and invite further questions.
     """,
-    model="gpt-4o-mini"
+    model="gpt-5-mini"
 )
 ```
 
@@ -192,7 +192,7 @@ email_coordinator = Agent(
             tool_description="Synthesize search results into comprehensive report"
         )
     ],
-    model="gpt-4o-mini"
+    model="gpt-5-mini"
 )
 ```
 
@@ -212,26 +212,26 @@ async def process_with_agent(user_email, content):
         context = f"""
         User email: {user_email}
         User message: {content}
-        
+
         Analyze and decide which agents to call.
         """
-        
+
         # Run coordinator - it handles everything
         result = await Runner.run(
             email_coordinator,
             message=context
         )
-        
+
         # Extract final output (should always exist from Runner.run)
         response = result.final_output
-        
+
         # Send email with response
         send_email(
             to=user_email,
             subject=determine_subject(content),
             body=format_email(response)
         )
-        
+
     except Exception as e:
         print(f"Error: {str(e)}")
         send_error_email(user_email)
@@ -247,17 +247,17 @@ async def process_with_agent(user_email, content):
 ```python
 def send_email(to, subject, body):
     sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-    
+
     message = Mail(
         from_email=Email("research@yourdomain.com", "Deep Research Assistant"),
         to_emails=To(to),
         subject=subject,
         html_content=Content("text/html", body)
     )
-    
+
     # Critical: Set reply-to for webhook loop
     message.reply_to = Email("reply@yourdomain.com")
-    
+
     sg.client.mail.send.post(request_body=message.get())
 ```
 
@@ -283,7 +283,7 @@ def send_email(to, subject, body):
 <html>
 <head>
     <style>
-        .header { background: linear-gradient(135deg, #667eea, #764ba2); 
+        .header { background: linear-gradient(135deg, #667eea, #764ba2);
                   color: white; padding: 30px; text-align: center; }
         .report { padding: 20px; }
     </style>
@@ -353,7 +353,7 @@ def send_email(to, subject, body):
 
 ```python
 # 1. Create agents
-answer_agent = Agent(name="AnswerAgent", instructions="...", model="gpt-4o-mini")
+answer_agent = Agent(name="AnswerAgent", instructions="...", model="gpt-5-mini")
 # question_generation_agent, search_agent, writer_agent from notebook
 
 # 2. Create coordinator with agents as tools
@@ -366,7 +366,7 @@ email_coordinator = Agent(
         search_agent.as_tool(tool_name="search_agent", tool_description="..."),
         writer_agent.as_tool(tool_name="writer_agent", tool_description="...")
     ],
-    model="gpt-4o-mini"
+    model="gpt-5-mini"
 )
 
 # 3. Webhook receives email
@@ -375,7 +375,7 @@ async def handle_inbound_email(request: Request):
     form_data = await request.form()
     user_email = extract_email(form_data.get("from"))
     clean_content = remove_quoted_text(form_data.get("text"))
-    
+
     # 4. Process with coordinator
     await process_with_agent(user_email, clean_content)
     return {"status": "received"}
@@ -383,10 +383,10 @@ async def handle_inbound_email(request: Request):
 # 5. Coordinator decides and executes
 async def process_with_agent(user_email, content):
     context = f"User: {user_email}\nMessage: {content}"
-    
+
     # Single Runner.run() call - coordinator handles the rest
     result = await Runner.run(email_coordinator, message=context)
-    
+
     # Runner.run() always returns result with final_output
     response = result.final_output
     send_email(to=user_email, subject="Re: Your Message", body=format_email(response))

@@ -17,12 +17,13 @@ story_outline_generator = Agent(
         "You generate a very short story outline based on the user's input."
         "If there is any feedback provided, use it to improve the outline."
     ),
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 
 class EvaluationFeedback(BaseModel):
     """The feedback from the evaluator on the story outline."""
+
     feedback: str
     # score: Literal["pass", "needs_improvement", "fail"]
     score: int = Field(
@@ -30,6 +31,7 @@ class EvaluationFeedback(BaseModel):
         ge=0,
         le=10,
     )
+
 
 evaluator = Agent[None](
     name="evaluator",
@@ -39,7 +41,7 @@ evaluator = Agent[None](
         "Never give it a pass on the first try."
     ),
     output_type=EvaluationFeedback,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 
@@ -61,7 +63,9 @@ async def main() -> None:
             )
 
             input_items = story_outline_result.to_input_list()
-            latest_outline = ItemHelpers.text_message_outputs(story_outline_result.new_items)
+            latest_outline = ItemHelpers.text_message_outputs(
+                story_outline_result.new_items
+            )
             print("Story outline generated")
 
             evaluator_result = await Runner.run(evaluator, input_items)
@@ -75,7 +79,9 @@ async def main() -> None:
 
             print("Re-running with feedback")
 
-            input_items.append({"content": f"Feedback: {result.feedback}", "role": "user"})
+            input_items.append(
+                {"content": f"Feedback: {result.feedback}", "role": "user"}
+            )
 
     print(f"Final story outline: {latest_outline}")
 

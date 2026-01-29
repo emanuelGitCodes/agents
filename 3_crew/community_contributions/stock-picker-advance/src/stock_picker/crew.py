@@ -28,8 +28,8 @@ scraper = ScrapeWebsiteTool()
 code_tool = CodeInterpreterTool()
 
 # Default LLM configuration
-default_llm = LLM(model="gpt-4o-mini")
-function_llm = LLM(model="gpt-4o-mini")
+default_llm = LLM(model="gpt-5-mini")
+function_llm = LLM(model="gpt-5-mini")
 
 # Memory/embeddings configuration
 # Uses OpenAI embeddings by default; relies on `OPENAI_API_KEY` in environment.

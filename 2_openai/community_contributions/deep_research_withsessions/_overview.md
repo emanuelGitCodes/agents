@@ -1,6 +1,6 @@
 The is an update of the deep research solution from the end of week 2.  Updates:
 - Focussed on research for an organisation with company and industry added in addition to query
-- Introduction of a research manager agent to orchestrate and review / QA.  I had to use gpt-4o as the results were poor with gpt-4o-mini
+- Introduction of a research manager agent to orchestrate and review / QA.  I had to use gpt-4o as the results were poor with gpt-5-mini
 - Planner, writer, search and email agents as tools
 - Used sessions to allow an initial report be generated in the UI, user feedback for updates, handoff to email agent (based on user confirmation).
 - User request to send email and provide email address through UI

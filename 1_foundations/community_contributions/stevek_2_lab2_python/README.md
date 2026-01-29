@@ -87,7 +87,7 @@ The script will:
 
 You can customize the script by modifying:
 
-- **`QUESTION_GENERATOR_MODEL`** (line 167): The model used to generate questions (default: `"gpt-4.1-mini"`)
+- **`QUESTION_GENERATOR_MODEL`** (line 167): The model used to generate questions (default: `"gpt-5-mini"`)
 - **`JUDGE_MODEL`** (line 319): The model used to judge responses (default: `"o3-mini"`)
 - **`COMPETITORS`** list (lines 196-227): Add, remove, or modify the models to test
 
@@ -105,4 +105,3 @@ You can customize the script by modifying:
 - **"ANTHROPIC_API_KEY missing"**: This is expected if you don't have an Anthropic key. The script will skip Anthropic models
 - **Ollama connection errors**: Ensure Ollama is running locally and accessible at the configured `OLLAMA_BASE_URL`
 - **Import errors**: Make sure all required packages are installed: `pip install openai anthropic python-dotenv`
-

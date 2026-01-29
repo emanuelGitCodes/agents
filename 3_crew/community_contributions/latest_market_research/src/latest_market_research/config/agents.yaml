@@ -16,7 +16,7 @@ emerging_companies_finder:
     Your research is concise, structured, and ready to be passed to analysts for detailed reporting.
     Output should be professional, structured, and easy to understand for decision-makers.
     You spot multiple companies that are trending in the news and you are able to pick the best ones for further research.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 
 financial_researcher:
@@ -28,7 +28,7 @@ financial_researcher:
   backstory: >
     You are an expert financial expert researcher with a proven track record of deeply analyzing hot
      {topic} companies and building comprehensive reports.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 
 
@@ -42,7 +42,7 @@ stock_picker:
   backstory: >
     You are a meticulous, skilled financial analyst with a proven track record of equity selection.
     You have a talent for synthesizing research and picking the best companies for investment.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 
 manager:
@@ -53,5 +53,4 @@ manager:
      which is to pick the best five(5) companies for investment.
   backstory: >
     You are an experienced and highly effective project manager who can delegate tasks to the right people.
-  llm: openai/gpt-4o-mini
-
+  llm: openai/gpt-5-mini

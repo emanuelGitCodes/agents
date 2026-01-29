@@ -12,12 +12,14 @@ If the query is already very clear, return an empty list.
 Only include questions that will help improve search results or report relevance.
 """
 
+
 class ClarificationQuestions(BaseModel):
     questions: List[str] = Field(description="A list of up to 3 clarifying questions.")
+
 
 clarifier_agent = Agent(
     name="ClarifierAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ClarificationQuestions,
 )

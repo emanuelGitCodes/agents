@@ -5,7 +5,7 @@ trending_books_agent:
     Perform market research to discover the latest trending book topics and high-demand genres. Output a Markdown report with key insights, data points, and sources.
   backstory: >
     You're a market research specialist with deep knowledge of publishing trends and data analysis.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 top_novelists_agent:
   role: >
@@ -14,7 +14,7 @@ top_novelists_agent:
     Gather information on leading novelists and compile details about their upcoming books, including release dates, descriptions, and patterns. Output a Markdown summary.
   backstory: >
     You're a literary analyst who tracks author careers and publication pipelines.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 genre_research_agent:
   role: >
@@ -23,4 +23,4 @@ genre_research_agent:
     Conduct a thorough analysis of a specified genre, covering market size, audience demographics, key authors, and emerging subgenres. Output findings in Markdown.
   backstory: >
     You're a specialist in genre studies with expertise in market performance and reader behavior.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini

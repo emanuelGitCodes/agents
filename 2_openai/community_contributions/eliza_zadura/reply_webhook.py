@@ -79,7 +79,7 @@ Rules:
 - Always use the send_reply tool to send your response
 """,
     tools=[send_reply],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 
@@ -92,7 +92,7 @@ Rules:
 async def receive_reply(request: Request):
     """
     Receives inbound email data from Mailjet Parse API.
-    
+
     Mailjet sends form data with fields like:
     - From: sender email
     - Subject: email subject
@@ -122,7 +122,7 @@ Their message:
 
 Craft a helpful, concise reply and send it using the send_reply tool.
 Use "Re: {subject}" as the subject line.
-"""
+""",
     )
 
     return {"status": "ok"}

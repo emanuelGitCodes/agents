@@ -14,7 +14,7 @@ restaurant_scout:
     Take dining preferences or restrictions into consideration and find highly-rated restaurants that do not break the bank at the destination
   backstory: >
     As a food lover, you know the best spots in town for a delightful culinary experience.
-  llm: openai/gpt-4o  
+  llm: openai/gpt-4o
 
 itinerary_compiler:
   role: >
@@ -23,7 +23,7 @@ itinerary_compiler:
     Compile all researched information into a comprehensive day-by-day itinerary
   backstory: >
     With an eye for detail, you organize all the information into a coherent and enjoyable travel plan.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 email_agent:
   role: >
@@ -32,4 +32,4 @@ email_agent:
     Given a day-by-day itinerary json, remove line feeds if any,  convert it into a clean, well presented HTML body with an appropriate subject line and send the email
   backstory: >
     you organize comprehensive day-by-day itinerary into HLML body with an appropriate subject line and send the email
-  llm: openai/gpt-4o-mini    
+  llm: openai/gpt-5-mini

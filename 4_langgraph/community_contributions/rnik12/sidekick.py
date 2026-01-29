@@ -59,15 +59,15 @@ class Sidekick:
         self.tools, self.browser, self.playwright = await playwright_tools()
         self.tools += await other_tools()
 
-        worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
 
-        evaluator_llm = ChatOpenAI(model="gpt-4o-mini")
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
         self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
             EvaluatorOutput
         )
 
-        self.clarifier_llm = ChatOpenAI(model="gpt-4o-mini")
+        self.clarifier_llm = ChatOpenAI(model="gpt-5-mini")
 
         await self.build_graph()
 
@@ -233,10 +233,10 @@ Success criteria:
             "feedback_on_work": eval_result.feedback,
             "success_criteria_met": eval_result.success_criteria_met,
             "user_input_needed": eval_result.user_input_needed,
-            "attempt_count": attempts,   # NEW
+            "attempt_count": attempts,  # NEW
         }
         return new_state
-    
+
     def route_based_on_evaluation(self, state: State) -> str:
         attempts = state.get("attempt_count", 0)
 

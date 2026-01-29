@@ -6,7 +6,7 @@
     backstory: >
       An expert in quantitative finance with a focus on pattern recognition,
       market cycles, and algorithmic indicators such as RSI, MACD, and moving averages.
-    llm: gpt-4o-mini
+    llm: gpt-5-mini
 
   news_analyst:
     role: Market Sentiment Analyst
@@ -16,7 +16,7 @@
     backstory: >
       A financial journalist turned sentiment specialist, skilled in reading subtle cues
       in market language to determine optimism, fear, or uncertainty.
-    llm: gpt-4o-mini
+    llm: gpt-5-mini
 
   dap_mediator:
     role: Consensus Mediator (DAP Protocol)
@@ -30,4 +30,4 @@
     backstory: >
       An experienced mediator who combines multiple analyses and ensures a balanced consensus
       between experts using the DAP Protocol methodology.
-    llm: gpt-4o-mini
+    llm: gpt-5-mini

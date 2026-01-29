@@ -30,7 +30,7 @@ You will be provided with a detailed security report in markdown format. You sho
 providing the report converted into clean, well presented HTML with an appropriate subject line that includes
 the image name and risk level."""
 
-    def __init__(self, model: str = "gpt-4o-mini"):
+    def __init__(self, model: str = "gpt-5-mini"):
         self.model = model
         self.agent = self._create_agent()
         logger.info("EmailAgent initialized")

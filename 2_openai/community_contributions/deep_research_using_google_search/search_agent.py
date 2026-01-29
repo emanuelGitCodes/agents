@@ -14,6 +14,6 @@ search_agent = Agent(
     name="Search agent",
     instructions=INSTRUCTIONS,
     tools=[run_google_search],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     model_settings=ModelSettings(tool_choice="required"),
 )

@@ -36,13 +36,13 @@ def setup_environment():
         load_dotenv(override=True)
     except Exception as e:
         print(f"\U0000274C Warning: Could not load .env file: {e}")
-    
+
     try:
         bedrock_api_key = os.environ["AWS_BEARER_TOKEN_BEDROCK"]
     except KeyError:
         bedrock_api_key = None
         print("\U0000274C Warning: AWS_BEARER_TOKEN_BEDROCK not found in environment")
-    
+
     openai_api_key = os.getenv("OPENAI_API_KEY")
     anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
     google_api_key = os.getenv("GEMINI_API_KEY")
@@ -59,7 +59,7 @@ def setup_environment():
             clients.update({"bedrock": bedrock_client})
         except Exception as e:
             print(f"\U0000274C Error initializing Bedrock client: {e}")
-    
+
     if anthropic_api_key:
         try:
             print("Anthropic API key loaded successfully. Initializing client")
@@ -67,7 +67,7 @@ def setup_environment():
             clients.update({"anthropic": anthropic_client})
         except Exception as e:
             print(f"\U0000274C Error initializing Anthropic client: {e}")
-    
+
     if openai_api_key:
         try:
             print("OpenAI API key loaded successfully. Initializing client")
@@ -75,7 +75,7 @@ def setup_environment():
             clients.update({"openai": openai_client})
         except Exception as e:
             print(f"\U0000274C Error initializing OpenAI client: {e}")
-    
+
     if google_api_key:
         try:
             print("Google API key loaded successfully. Initializing client")
@@ -86,7 +86,7 @@ def setup_environment():
             clients.update({"google": google_client})
         except Exception as e:
             print(f"\U0000274C Error initializing Google client: {e}")
-    
+
     if xai_api_key:
         try:
             print("XAI API key loaded successfully. Initializing client")
@@ -108,7 +108,7 @@ def setup_environment():
     return clients
 
 
-def call_openai(client, prompt, model="gpt-5-nano", **kwargs):
+def call_openai(client, prompt, model="gpt-5-mini", **kwargs):
     """
     Call the OpenAI API with the given prompt and model.
     """
@@ -225,7 +225,7 @@ def extract_json_response(text):
     # Find JSON that starts with {"results"
     pattern = r'(\{"results".*?\})'
     match = re.search(pattern, text, re.DOTALL)
-    
+
     if match:
         json_str = match.group(1)
         try:
@@ -233,7 +233,7 @@ def extract_json_response(text):
         except json.JSONDecodeError:
             # Try to find the complete JSON object
             return extract_complete_json(text)
-    
+
     return None
 
 def extract_complete_json(text):
@@ -241,7 +241,7 @@ def extract_complete_json(text):
     start_idx = text.find('{"response"')
     if start_idx == -1:
         return None
-    
+
     bracket_count = 0
     for i, char in enumerate(text[start_idx:], start_idx):
         if char == '{':
@@ -297,7 +297,7 @@ def main():
     print("Request: " + request)
     question_model = "gpt-oss:20b"
     print("\U0001f9e0 Asking model: " + question_model + " \U0001f9e0")
-    
+
     try:
         if "ollama" not in clients:
             print("\U0000274C Error: Ollama client not available")
@@ -318,7 +318,7 @@ def main():
         "bedrock": "us.meta.llama3-3-70b-instruct-v1:0",
         "anthropic": "claude-3-7-sonnet-latest",
         "openai": "gpt-5-mini",
-        "google": "gemini-2.5-flash",
+        "google": "gemini-3-flash-preview",
         "xai": "grok-3-mini",
         "ollama": "gpt-oss:20b",
     }
@@ -423,15 +423,15 @@ def main():
                 contestant_rankings[contestant].append(position)
 
         # Calculate average rankings
-        average_rankings = {contestant: sum(ranks)/len(ranks) 
+        average_rankings = {contestant: sum(ranks)/len(ranks)
                         for contestant, ranks in contestant_rankings.items() if ranks}
 
         #print(average_rankings)
-        
+
         if not average_rankings:
             print("\U0000274C Error: No valid rankings to process")
             return
-            
+
         # Sort by average (ascending - lowest average = best rank)
         sorted_results = sorted(average_rankings.items(), key=lambda x: x[1])
         #print(sorted_results)

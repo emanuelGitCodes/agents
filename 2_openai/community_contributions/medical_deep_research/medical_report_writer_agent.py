@@ -31,17 +31,22 @@ INSTRUCTIONS = (
 
 
 class MedicalReportData(BaseModel):
-    short_summary: str = Field(description="A concise 2-3 sentence executive summary of the medical findings.")
-    
-    markdown_report: str = Field(description="The complete medical literature review report in markdown format with proper citations.")
-    
-    follow_up_research_questions: list[str] = Field(description="Suggested medical research questions or areas for further investigation.")
+    short_summary: str = Field(
+        description="A concise 2-3 sentence executive summary of the medical findings."
+    )
+
+    markdown_report: str = Field(
+        description="The complete medical literature review report in markdown format with proper citations."
+    )
+
+    follow_up_research_questions: list[str] = Field(
+        description="Suggested medical research questions or areas for further investigation."
+    )
 
 
 medical_writer_agent = Agent(
     name="MedicalWriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=MedicalReportData,
 )
-

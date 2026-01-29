@@ -4,8 +4,11 @@ import sendgrid
 from sendgrid.helpers.mail import Email, Mail, Content, To
 from agents import Agent, function_tool
 
+
 @function_tool
-def send_email(subject: str, html_body: str, email_to: str, email_from: str) -> Dict[str, str]:
+def send_email(
+    subject: str, html_body: str, email_to: str, email_from: str
+) -> Dict[str, str]:
     """Send an email with the given subject and HTML body"""
     sg = sendgrid.SendGridAPIClient(api_key=os.environ.get("SENDGRID_API_KEY"))
     from_email = Email(email_from)  # put your verified sender here
@@ -18,7 +21,7 @@ def send_email(subject: str, html_body: str, email_to: str, email_from: str) -> 
 
 
 email_agent_instructions = """You are able to send a nicely formatted HTML email based on a detailed report.
-You will be provided with a detailed report. You should use your tool to send one email, providing the 
+You will be provided with a detailed report. You should use your tool to send one email, providing the
 report converted into clean, well presented HTML with an appropriate subject line.
 As an input you will get:
 - email address to which you should send email to.
@@ -30,6 +33,5 @@ email_agent = Agent(
     name="Email agent",
     instructions=email_agent_instructions,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
-

@@ -38,14 +38,14 @@ async def list_date_tools():
             await session.initialize()
             tools_result = await session.list_tools()
             return tools_result.tools
-    
+
 async def call_date_tool(tool_name, tool_args):
     async with stdio_client(date_params) as streams:
         async with mcp.ClientSession(*streams) as session:
             await session.initialize()
             result = await session.call_tool(tool_name, tool_args)
             return result
-        
+
 async def get_current_date() -> str:
     result = await call_date_tool('get_current_date', {})
     return result
@@ -58,23 +58,23 @@ date_tool = FunctionTool(
 )
 
 
-# Main Client        
+# Main Client
 instructions = """
 You are a news reporter. You are given a topic and you will use the tools provided to you and fetch the news for the topic
-from the current date. 
+from the current date.
 For each of the 5 items you MUST provide a real URL and a serperate headline.
 If you can not find a URL, search again.
-In the markdwon each bullet must be in this format: 
+In the markdwon each bullet must be in this format:
 1. Headline
     URL
 2. Headline
-    URL 
+    URL
     ....
 Provide the results with the current date, the headlines and the urls of the articles you found in a markdwon file in the news folder.
-""" 
+"""
 topic = 'AI'
 request = f'get me the news for {topic}'
-model = 'gpt-4.1-mini'
+model = 'gpt-5-mini'
 
 
 async def main():
@@ -90,7 +90,7 @@ async def main():
         result = await Runner.run(agent, request)
         print(result.final_output)
         display(Markdown(result.final_output))
-        
-        
+
+
 if __name__ == '__main__':
     asyncio.run(main())

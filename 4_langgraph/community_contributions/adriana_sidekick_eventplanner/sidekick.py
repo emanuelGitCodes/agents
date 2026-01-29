@@ -20,28 +20,35 @@ load_dotenv(override=True)
 
 # Outputs
 class EvaluatorOutput(BaseModel):
-    feedback: str = Field(description='Feedback on assistants reponse')
-    success_criteria_met: bool = Field(description='Whether the criteria have been met.')
+    feedback: str = Field(description="Feedback on assistants reponse")
+    success_criteria_met: bool = Field(
+        description="Whether the criteria have been met."
+    )
     user_input_needed: bool = Field(
-        description='True if more input is needed from the user, or clarification, or assistant is stuck, or user input is incomplete'
-        )
+        description="True if more input is needed from the user, or clarification, or assistant is stuck, or user input is incomplete"
+    )
+
 
 class EventOutput(BaseModel):
     country: str
     city: str
-    date: str = Field(..., description='Date must be given, e.g. 2026-10-13')
+    date: str = Field(..., description="Date must be given, e.g. 2026-10-13")
     vibe: str
-    why_recommended: str = Field(description="Short reason why this event is recommended")
-    approx_cost: str = Field(description='Calculated costs')
+    why_recommended: str = Field(
+        description="Short reason why this event is recommended"
+    )
+    approx_cost: str = Field(description="Calculated costs")
 
 
 # Inputs
 class EventPlannerInput(BaseModel):
     country: str
     city: str
-    date: str = Field(..., description='Date must be given, e.g. 2026-10-13')
-    vibe: str = Field(description='User defines what kind of vibe he/she looking for, e.g. House, Techno ...')
-    budget: Optional[int] = Field(description='Max budget')
+    date: str = Field(..., description="Date must be given, e.g. 2026-10-13")
+    vibe: str = Field(
+        description="User defines what kind of vibe he/she looking for, e.g. House, Techno ..."
+    )
+    budget: Optional[int] = Field(description="Max budget")
 
 
 class State(TypedDict):
@@ -53,8 +60,7 @@ class State(TypedDict):
     event_input: Optional[EventPlannerInput]
 
 
-
-# Sidekick 
+# Sidekick
 class Sidekick:
     def __init__(self):
         self.worker_llm_with_tools = None
@@ -71,16 +77,20 @@ class Sidekick:
     async def setup(self):
         self.tools, self.browser, self.playwright = await playwright_tools()
         self.tools += await all_tools()
-        
-        intake_llm = ChatOpenAI(model='gpt-4o-mini')
-        self.intake_llm_with_input = intake_llm.with_structured_output(EventPlannerInput)
-        
-        worker_llm = ChatOpenAI(model='gpt-4o-mini')
+
+        intake_llm = ChatOpenAI(model="gpt-5-mini")
+        self.intake_llm_with_input = intake_llm.with_structured_output(
+            EventPlannerInput
+        )
+
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
-        
-        evaluator_llm = ChatOpenAI(model='gpt-4o-mini')
-        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(EvaluatorOutput)
-        
+
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
+        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
+            EvaluatorOutput
+        )
+
         await self.build_graph()
 
     def get_last_user_text(self, state: State) -> str:
@@ -93,16 +103,14 @@ class Sidekick:
         if isinstance(last_text, dict) and "content" in last_text:
             return str(last_text["content"])
 
-
         return str(last_text)
 
-    
     def intake(self, state: State) -> Dict[str, Any]:
         """
         Extract required input fields from the user's message using structured output.
         If anything essential is missing, ask a targeted question and stop.
         Otherwise store parsed input in state['event_input'] and proceed.
-        """ 
+        """
 
         user_text = self.get_last_user_text(state)
 
@@ -119,7 +127,7 @@ class Sidekick:
         )
 
         missing = []
-        
+
         if not getattr(extracted, "country", None):
             missing.append("country")
         if not getattr(extracted, "city", None):
@@ -147,32 +155,30 @@ class Sidekick:
         }
 
     def intake_router(self, state: State) -> str:
-        """Route after intake: either stop (need user input) or continue to worker.""" 
+        """Route after intake: either stop (need user input) or continue to worker."""
         return "END" if state.get("user_input_needed") else "worker"
-
-        
 
     def worker(self, state: State) -> Dict[str, Any]:
         system_message = f""" Your are a helpful event planner assistant that can use tools to complete tasks.
-        You keep working on a task until either you have a question or need clarification from the user, 
-        or the user input is incomplete. You have tools to browse the internet for the events, navigating and 
+        You keep working on a task until either you have a question or need clarification from the user,
+        or the user input is incomplete. You have tools to browse the internet for the events, navigating and
         retrieving web pages.
-        
+
 
         This is the success criteria:
         {state["success_criteria"]}
-        
+
         You should use the structured event input in {state['event_input']}.
         You should reply either with a question for the user about this assignement, or with the final response.
-        If you have any question or you miss some user input, you need to reply by clearly stating your question. 
+        If you have any question or you miss some user input, you need to reply by clearly stating your question.
         An example might be:
-        
+
         Question: Please provide the missing city.
 
         If you've finished, reply with the final answer, don't ask a question; simply reply with the answer.
         """
 
-        if state.get('feedback_on_work'):
+        if state.get("feedback_on_work"):
             system_message += f"""
             Previously you thought you completed the task, but your reply was rejected beacause the success criteria was not met.
             Here is the feedback on why this was rejected:
@@ -181,7 +187,7 @@ class Sidekick:
             """
 
         found_system_message = False
-        messages = state['messages']
+        messages = state["messages"]
         for message in messages:
             if isinstance(message, SystemMessage):
                 message.content = system_message
@@ -193,31 +199,31 @@ class Sidekick:
         response = self.worker_llm_with_tools.invoke(messages)
 
         return {
-            'messages': [response],
+            "messages": [response],
         }
 
     def worker_router(self, state: State) -> str:
-        last_message = state['messages'][-1]
+        last_message = state["messages"][-1]
 
-        if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
-            return 'tools'
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            return "tools"
 
         else:
-            return 'evaluator'
+            return "evaluator"
 
     def format_conversation(self, messages: List[Any]) -> str:
-        conversation = 'Conversation history: \n\n'
+        conversation = "Conversation history: \n\n"
         for message in messages:
             if isinstance(message, HumanMessage):
-                conversation += f'User: {message.content}\n'
+                conversation += f"User: {message.content}\n"
             elif isinstance(message, AIMessage):
-                text = message.content or '[Tool use]'
-                conversation += f'Assistant: {text}\n'
+                text = message.content or "[Tool use]"
+                conversation += f"Assistant: {text}\n"
 
         return conversation
 
     def evaluator(self, state: State) -> State:
-        last_response = state['messages'][-1].content
+        last_response = state["messages"][-1].content
 
         system_message = """ You are an evaluator that determines if a a task has been completed sucessfully.
         Assess the Assistant's last responce based on the given criteria- Respond with your feedback, and with your decision on whether the success criteria has been met,
@@ -266,51 +272,52 @@ class Sidekick:
         }
         return new_state
 
-
     def route_based_on_evaluation(self, state: State) -> str:
         if state["success_criteria_met"] or state["user_input_needed"]:
             return "END"
         else:
             return "worker"
 
-
     async def build_graph(self):
         graph_builder = StateGraph(State)
 
-        graph_builder.add_node('intake', self.intake)
-        graph_builder.add_node('worker', self.worker)
-        graph_builder.add_node('tools', ToolNode(tools=self.tools))
-        graph_builder.add_node('evaluator', self.evaluator)
+        graph_builder.add_node("intake", self.intake)
+        graph_builder.add_node("worker", self.worker)
+        graph_builder.add_node("tools", ToolNode(tools=self.tools))
+        graph_builder.add_node("evaluator", self.evaluator)
 
         graph_builder.add_conditional_edges(
-            'worker', self.worker_router, {'tools': 'tools', 'evaluator': 'evaluator'}
+            "worker", self.worker_router, {"tools": "tools", "evaluator": "evaluator"}
         )
         graph_builder.add_edge("tools", "worker")
-        #graph_builder.add_edge('intake', 'worker')
-        
+        # graph_builder.add_edge('intake', 'worker')
+
         graph_builder.add_conditional_edges(
-            'evaluator', self.route_based_on_evaluation, {'worker': 'worker', 'END': END}
-            )
-        graph_builder.add_edge(START, 'intake')
+            "evaluator",
+            self.route_based_on_evaluation,
+            {"worker": "worker", "END": END},
+        )
+        graph_builder.add_edge(START, "intake")
         graph_builder.add_conditional_edges(
-            "intake", self.intake_router, {"worker": "worker", "END": END},
+            "intake",
+            self.intake_router,
+            {"worker": "worker", "END": END},
         )
 
         self.graph = graph_builder.compile(checkpointer=self.memory)
 
-
     async def run_superstep(self, message, success_criteria, history):
-        config = {'configurable': {'thread_id': self.sidekick_id}}
+        config = {"configurable": {"thread_id": self.sidekick_id}}
 
         state = {
-            'messages': message,
-            'success_criteria': success_criteria,
-            'feedback_on_work': None,
-            'success_criteria_met': False,
-            'user_input_needed': False,
+            "messages": message,
+            "success_criteria": success_criteria,
+            "feedback_on_work": None,
+            "success_criteria_met": False,
+            "user_input_needed": False,
             "event_input": None,
         }
-        
+
         result = await self.graph.ainvoke(state, config=config)
         user = {"role": "user", "content": message}
         reply = {"role": "assistant", "content": result["messages"][-2].content}

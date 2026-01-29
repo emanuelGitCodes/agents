@@ -7,16 +7,21 @@ to perform to best answer the query. Output {constants.HOW_MANY_SEARCHES} terms 
 
 
 class WebSearchItem(BaseModel):
-    reason: str = Field(description="Your reasoning for why this search is important to the query.")
+    reason: str = Field(
+        description="Your reasoning for why this search is important to the query."
+    )
     query: str = Field(description="The search term to use for the web search.")
 
 
 class WebSearchPlan(BaseModel):
-    searches: list[WebSearchItem] = Field(description="A list of web searches to perform to best answer the query.")
-    
+    searches: list[WebSearchItem] = Field(
+        description="A list of web searches to perform to best answer the query."
+    )
+
+
 planner_agent = Agent(
     name="PlannerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=WebSearchPlan,
 )

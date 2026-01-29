@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-5-mini"
 
 
 class ChatGPTLLM:
@@ -35,8 +35,7 @@ class ChatGPTLLM:
                 {"role": "user", "content": prompt},
             ]
             resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages
+                model=self.model, messages=messages
             )
             content = resp.choices[0].message.content
             return {"text": content or "", "raw": json.loads(resp.model_dump_json())}

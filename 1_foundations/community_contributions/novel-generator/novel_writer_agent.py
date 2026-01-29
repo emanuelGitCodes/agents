@@ -1,7 +1,10 @@
 from agents import Agent, gen_trace_id, ModelSettings, Runner, trace
 
-async def generate_novel(genre, title, num_pages, num_words, num_chapters, plot, max_tokens):
-  INSTRUCTIONS = f"You are a fiction author assistant. You will use user-provided parameters, \
+
+async def generate_novel(
+    genre, title, num_pages, num_words, num_chapters, plot, max_tokens
+):
+    INSTRUCTIONS = f"You are a fiction author assistant. You will use user-provided parameters, \
   or default parameters, to generate a creative and engaging novel. \
   Do not perform web searches. Focus entirely on imaginative, coherent, and emotionally engaging content. \
   Your output should read like a real novel, vivid, descriptive, and character-driven. \
@@ -31,25 +34,22 @@ async def generate_novel(genre, title, num_pages, num_words, num_chapters, plot,
   Continue generating story content until the target word count is reached or slightly exceeded. \
   Do not summarize or compress events to shorten the story."
 
-  novel_writer_agent = Agent(
-      name="Novel Writer Agent",
-      instructions=INSTRUCTIONS,
-      model="gpt-4o-mini",
-      model_settings=ModelSettings(
-          temperature=0.8,
-          top_p=0.9,
-          frequency_penalty=0.5,
-          presence_penalty=0.6,
-          max_tokens=max_tokens
-      )
-  )
+    novel_writer_agent = Agent(
+        name="Novel Writer Agent",
+        instructions=INSTRUCTIONS,
+        model="gpt-5-mini",
+        model_settings=ModelSettings(
+            temperature=0.8,
+            top_p=0.9,
+            frequency_penalty=0.5,
+            presence_penalty=0.6,
+            max_tokens=max_tokens,
+        ),
+    )
 
-  message = f"Generate a {genre} novel titled '{title}' with {num_pages} pages."
+    message = f"Generate a {genre} novel titled '{title}' with {num_pages} pages."
 
-  generate_novel_trace_id = gen_trace_id()
-  result = await Runner.run(
-      novel_writer_agent, 
-      message
-  )
+    generate_novel_trace_id = gen_trace_id()
+    result = await Runner.run(novel_writer_agent, message)
 
-  return result.final_output
+    return result.final_output

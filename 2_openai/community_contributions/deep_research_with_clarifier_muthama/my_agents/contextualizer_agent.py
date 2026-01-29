@@ -50,9 +50,15 @@ ShortText = constr(strip_whitespace=True, min_length=10, max_length=2000)
 class ClarifyingQA(BaseModel):
     """One clarifying question, its purpose, and the user's answer."""
 
-    question: ShortText = Field(..., description="The clarifying question that was asked.")
-    purpose: ShortText = Field(..., description="One-line purpose of the clarifying question.")
-    answer: Optional[ShortText] = Field(None, description="The user's answer to this question.")
+    question: ShortText = Field(
+        ..., description="The clarifying question that was asked."
+    )
+    purpose: ShortText = Field(
+        ..., description="One-line purpose of the clarifying question."
+    )
+    answer: Optional[ShortText] = Field(
+        None, description="The user's answer to this question."
+    )
 
     @field_validator("answer")
     @classmethod
@@ -76,7 +82,9 @@ class ContextualizerInput(BaseModel):
     def ensure_consistency(self) -> "ContextualizerInput":
         # Quick guard: avoid excessive clarifying data (reasonable cap)
         if len(self.clarifying_qa) > 10:
-            raise ValueError("No more than 10 clarifying Q/A pairs are supported in a single request.")
+            raise ValueError(
+                "No more than 10 clarifying Q/A pairs are supported in a single request."
+            )
         return self
 
 
@@ -86,7 +94,9 @@ class ContextualizedQuery(BaseModel):
     This model enforces the 'output-only' requirement and the <=5 sentence rule.
     """
 
-    contextualized_query: ShortText = Field(..., description="Final contextualized query (max 5 sentences).")
+    contextualized_query: ShortText = Field(
+        ..., description="Final contextualized query (max 5 sentences)."
+    )
 
     @field_validator("contextualized_query")
     @classmethod
@@ -102,18 +112,30 @@ class ContextualizedQuery(BaseModel):
         low = contextualized_query.lower().lstrip()
         for p in forbidden_prefixes:
             if low.startswith(p):
-                raise ValueError("Output must contain only the contextualized query string (no labels or preamble).")
+                raise ValueError(
+                    "Output must contain only the contextualized query string (no labels or preamble)."
+                )
 
         # Remove stray quotation marks around the whole output
-        if (contextualized_query.startswith('"') and contextualized_query.endswith('"')) or (contextualized_query.startswith("'") and contextualized_query.endswith("'")):
+        if (
+            contextualized_query.startswith('"') and contextualized_query.endswith('"')
+        ) or (
+            contextualized_query.startswith("'") and contextualized_query.endswith("'")
+        ):
             contextualized_query = contextualized_query[1:-1].strip()
 
         # Enforce sentence count <= 5 (approximate by splitting on sentence terminators)
         terminators = ".!?"
         # naive split: count occurrences of terminators that end sentences
-        sentences = [sentence for sentence in _split_sentences(contextualized_query) if sentence.strip()]
+        sentences = [
+            sentence
+            for sentence in _split_sentences(contextualized_query)
+            if sentence.strip()
+        ]
         if len(sentences) > 5:
-            raise ValueError("Contextualized query must be no longer than five sentences.")
+            raise ValueError(
+                "Contextualized query must be no longer than five sentences."
+            )
         return contextualized_query.strip()
 
 
@@ -127,7 +149,7 @@ def _split_sentences(text: str) -> List[str]:
     parts = re.split(r'(?<=[\.\?\!])\s+(?=[A-Z0-9"\'\(\[])|(?<=[\.\?\!])$', text)
     # Fallback: if splitting yields single chunk, try simpler split
     if len(parts) == 1:
-        parts = re.split(r'(?<=[\.\?\!])\s+', text)
+        parts = re.split(r"(?<=[\.\?\!])\s+", text)
     return [part.strip() for part in parts if part is not None]
 
 
@@ -143,6 +165,6 @@ def validate_model_output(raw: dict) -> ContextualizedQuery:
 contextualizing_agent = Agent(
     name="ContextualizerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ContextualizedQuery,
 )

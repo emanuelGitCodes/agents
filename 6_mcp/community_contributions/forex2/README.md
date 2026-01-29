@@ -178,10 +178,10 @@ async with MCPServerStdio(params=exchange_params) as mcp_server:
     agent = Agent(
         name="currency_analyst",
         instructions="You are a currency exchange analyst.",
-        model="gpt-4o-mini",
+        model="gpt-5-mini",
         mcp_servers=[mcp_server]
     )
-    
+
     result = await Runner.run(agent, "What's the current USD to EUR rate?")
 ```
 

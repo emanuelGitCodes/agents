@@ -207,8 +207,8 @@ Edit `sidekick.py` (lines 73-77):
 
 ```python
 worker_llm = ChatOpenAI(model="gpt-4o")           # Change to gpt-4o
-evaluator_llm = ChatOpenAI(model="gpt-4o-mini")   # Keep lightweight
-planner_llm = ChatOpenAI(model="gpt-4o-mini")     # Keep lightweight
+evaluator_llm = ChatOpenAI(model="gpt-5-mini")   # Keep lightweight
+planner_llm = ChatOpenAI(model="gpt-5-mini")     # Keep lightweight
 ```
 
 ### Adjusting Planner Questions

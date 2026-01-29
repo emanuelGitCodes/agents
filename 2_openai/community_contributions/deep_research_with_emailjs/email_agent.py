@@ -7,12 +7,13 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 # === CONFIGURATION CONSTANTS ===
-PUBLIC_KEY: str =  os.getenv('EJS_PUBLIC_KEY')
-SERVICE_ID: str = os.getenv('EJS_SERVICE_ID')
-TEMPLATE_ID: str = os.getenv('EJS_TEMPLATE_ID')
-ACCESS_TOKEN: str = os.getenv('EJS_ACCESS_TOKEN')
+PUBLIC_KEY: str = os.getenv("EJS_PUBLIC_KEY")
+SERVICE_ID: str = os.getenv("EJS_SERVICE_ID")
+TEMPLATE_ID: str = os.getenv("EJS_TEMPLATE_ID")
+ACCESS_TOKEN: str = os.getenv("EJS_ACCESS_TOKEN")
 EMAIL_API_URL: str = "https://api.emailjs.com/api/v1.0/email/send"
-SELF_COPY_EMAIL: str = os.getenv('EJS_SELF_EMAIL')
+SELF_COPY_EMAIL: str = os.getenv("EJS_SELF_EMAIL")
+
 
 def build_email_payload(email: str, subject: str, html_body: str) -> Dict:
     return {
@@ -20,11 +21,7 @@ def build_email_payload(email: str, subject: str, html_body: str) -> Dict:
         "template_id": TEMPLATE_ID,
         "user_id": PUBLIC_KEY,
         "accessToken": ACCESS_TOKEN,
-        "template_params": {
-            "email": email,
-            "subject": subject,
-            "content": html_body
-        }
+        "template_params": {"email": email, "subject": subject, "content": html_body},
     }
 
 
@@ -52,5 +49,5 @@ email_agent = Agent(
     name="Email agent",
     instructions=INSTRUCTIONS,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )

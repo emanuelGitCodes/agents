@@ -31,25 +31,29 @@ When sending notifications:
 
 async def run_dns_monitor_agent():
     """Run intelligent DNS monitoring agent"""
-    
-    async with MCPServerStdio(params=dns_server_params, client_session_timeout_seconds=30) as dns_server:
-        async with MCPServerStdio(params=push_server_params, client_session_timeout_seconds=30) as push_server:
-            
+
+    async with MCPServerStdio(
+        params=dns_server_params, client_session_timeout_seconds=30
+    ) as dns_server:
+        async with MCPServerStdio(
+            params=push_server_params, client_session_timeout_seconds=30
+        ) as push_server:
+
             agent = Agent(
                 name="dns_monitor",
                 instructions=instructions,
-                model="gpt-4o-mini",
-                mcp_servers=[dns_server, push_server]
+                model="gpt-5-mini",
+                mcp_servers=[dns_server, push_server],
             )
-            
+
             print("🤖 Starting DNS Monitoring Agent...\n")
-            
+
             # Run the agent with the monitoring task
             result = await Runner.run(
-                agent, 
-                "Check all domains expiring within 3 months and send push notifications for each one based on urgency. Prioritize critical domains (< 7 days) first."
+                agent,
+                "Check all domains expiring within 3 months and send push notifications for each one based on urgency. Prioritize critical domains (< 7 days) first.",
             )
-            
+
             print(f"\n✅ Agent Summary:\n{result.final_output}\n")
 
 

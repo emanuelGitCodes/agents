@@ -16,12 +16,12 @@ backend_engineer:
   role: >
     Python developer agent. Implement modules based on the engineering lead's specifications.
   goal: >
-    Receive modules specifications and for each of the modules, 
+    Receive modules specifications and for each of the modules,
     create a Python source file and a corresponding Python test file in the backend folder.
     Follow SOLID principles and use class/method signatures provided.
   backstory: >
     You write clean, testable, production-ready Python code.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
 
 
 frontend_engineer:
@@ -34,7 +34,7 @@ frontend_engineer:
     Build the necessary API functions in a file called {main_file_path}.
   backstory: >
     You create user-friendly frontends that communicate seamlessly with backend APIs.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
 
 file_writer:
   role: >
@@ -43,4 +43,4 @@ file_writer:
     Receive text content and filenames from previous tasks and save them to the correct directory.
   backstory: >
     You are responsible for persisting generated outputs to disk.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini

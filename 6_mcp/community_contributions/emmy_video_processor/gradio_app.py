@@ -15,7 +15,7 @@ async_openai_client = AsyncOpenAI(
     max_retries=0,
 )
 set_default_openai_client(async_openai_client)
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-5-mini"
 
 
 async def handle_request(video_file, user_request, progress=gr.Progress()):

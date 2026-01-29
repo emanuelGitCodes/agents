@@ -12,7 +12,7 @@ import gradio as gr
 load_dotenv(override=True)
 
 #Retrieval model
-OPENAI_MODEL = "gpt-5-nano"
+OPENAI_MODEL = "gpt-5-mini"
 EMBEDDING_MODEL = "text-embedding-3-small"
 
 # evaluation model
@@ -443,7 +443,7 @@ def build_ui(app: HiddenGemsRAG):
         gr.Markdown("# Hidden Gems World Travel Guide")
         gr.Markdown(
             "This chat retrieves from locally generated guides. "
-            "Model: OpenAI gpt-5-nano for answers; Evaluator: Anthropic claude-sonnet-4-5."
+            "Model: OpenAI gpt-5-mini for answers; Evaluator: Anthropic claude-sonnet-4-5."
         )
         fields = app.infer_site_fields()
         if fields:
@@ -477,5 +477,3 @@ if __name__ == "__main__":
     app = HiddenGemsRAG(base_dir)
     ui = build_ui(app)
     ui.launch()
-
-

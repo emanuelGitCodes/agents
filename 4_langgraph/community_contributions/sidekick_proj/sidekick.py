@@ -27,7 +27,9 @@ class State(TypedDict):
 
 class EvaluatorOutput(BaseModel):
     feedback: str = Field(description="Feedback on the assistant's response")
-    success_criteria_met: bool = Field(description="Whether the success criteria have been met")
+    success_criteria_met: bool = Field(
+        description="Whether the success criteria have been met"
+    )
     user_input_needed: bool = Field(
         description="True if more input is needed from the user, or clarifications, or the assistant is stuck"
     )
@@ -48,10 +50,12 @@ class Sidekick:
     async def setup(self):
         self.tools, self.browser, self.playwright = await playwright_tools()
         self.tools += await other_tools()
-        worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
-        evaluator_llm = ChatOpenAI(model="gpt-4o-mini")
-        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(EvaluatorOutput)
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
+        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
+            EvaluatorOutput
+        )
         await self.build_graph()
 
     def worker(self, state: State) -> Dict[str, Any]:
@@ -64,13 +68,13 @@ class Sidekick:
     - A tool called "save_file" to save files in various formats - YOU MUST USE THIS TOOL when the user asks you to create, save, or write a file
     - File management tools to read, write, and manage files in the sandbox directory
     - Wikipedia tool for encyclopedia information
-    
+
     WORKFLOW FOR FINDING INFORMATION:
     1. If the user asks about something without providing a URL, use the "search" tool first to find relevant websites
     2. Review the search results to identify the most relevant URLs
     3. Use browser navigation tools to visit those URLs and extract detailed information
     4. Compile the information and save it using the save_file tool if requested
-    
+
     CRITICAL INSTRUCTIONS FOR FILE CREATION:
     - If the user asks you to create, save, write, or document something in a file (Markdown, HTML, text, etc.), you MUST use the save_file tool
     - Do not just say you will create the file - actually call the save_file tool with the content and filename
@@ -79,7 +83,7 @@ class Sidekick:
     - For Python files, use extension .py (e.g., "script.py")
     - Always include the file extension in the filename
     - The save_file tool takes two arguments: (content_string, filename_string)
-    
+
     The current date and time is {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
     This is the success criteria:
@@ -136,8 +140,17 @@ class Sidekick:
                 text = message.content or "[Tools use]"
                 # Include tool calls in the conversation
                 if hasattr(message, "tool_calls") and message.tool_calls:
-                    tool_names = [tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, "name", "unknown") for tc in message.tool_calls]
-                    conversation += f"Assistant: [Used tools: {', '.join(tool_names)}] {text}\n"
+                    tool_names = [
+                        (
+                            tc.get("name", "unknown")
+                            if isinstance(tc, dict)
+                            else getattr(tc, "name", "unknown")
+                        )
+                        for tc in message.tool_calls
+                    ]
+                    conversation += (
+                        f"Assistant: [Used tools: {', '.join(tool_names)}] {text}\n"
+                    )
                 else:
                     conversation += f"Assistant: {text}\n"
         return conversation
@@ -214,7 +227,9 @@ class Sidekick:
         )
         graph_builder.add_edge("tools", "worker")
         graph_builder.add_conditional_edges(
-            "evaluator", self.route_based_on_evaluation, {"worker": "worker", "END": END}
+            "evaluator",
+            self.route_based_on_evaluation,
+            {"worker": "worker", "END": END},
         )
         graph_builder.add_edge(START, "worker")
 
@@ -224,12 +239,13 @@ class Sidekick:
     async def run_superstep(self, message, success_criteria, history):
         config = {
             "configurable": {"thread_id": self.sidekick_id},
-            "recursion_limit": 50  # Increase recursion limit for complex tasks
+            "recursion_limit": 50,  # Increase recursion limit for complex tasks
         }
 
         state = {
             "messages": message,
-            "success_criteria": success_criteria or "The answer should be clear and accurate",
+            "success_criteria": success_criteria
+            or "The answer should be clear and accurate",
             "feedback_on_work": None,
             "success_criteria_met": False,
             "user_input_needed": False,

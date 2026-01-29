@@ -19,7 +19,7 @@ screenshots_dir = os.path.join(test_results_dir, "screenshots")
 
 os.makedirs(reports_dir, exist_ok=True)
 os.makedirs(screenshots_dir, exist_ok=True)
-    
+
 print("🚀 Starting Full BDD Agent Test")
 print(f"📁 Test results: {test_results_dir}\n")
 
@@ -47,7 +47,7 @@ Scenario 1: Add a new todo item
   And I press the "Enter" key
   # You learn: "add todo" = specific selectors and actions
 
-Scenario 2: Add multiple todos  
+Scenario 2: Add multiple todos
   When I add todo "First task"
   # You apply: Use the pattern from Scenario 1 automatically
   # You know: type the input field "Enter new todo text here" with text + press "Enter"
@@ -94,10 +94,26 @@ Execute with intelligence and memory across all scenarios.
 
 # parameters
 mcp_server_params = [
-    {"command":"npx", "args":["@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated"]},
-    {"command":"python", "args":["mcp-servers/assertion-server/assertion_server_python.py"]},
-    {"command":"npx", "args":["-y", "@modelcontextprotocol/server-filesystem", test_results_dir]}
+    {
+        "command": "npx",
+        "args": [
+            "@playwright/mcp@latest",
+            "--browser",
+            "chromium",
+            "--headless",
+            "--isolated",
+        ],
+    },
+    {
+        "command": "python",
+        "args": ["mcp-servers/assertion-server/assertion_server_python.py"],
+    },
+    {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", test_results_dir],
+    },
 ]
+
 
 class BDDAgent:
 
@@ -106,18 +122,16 @@ class BDDAgent:
         self.bdd_prompt = bddPrompt
         print(self.bdd_prompt)
 
-
     # BDD Agent
     async def getBddAgent(self, mcp_servers) -> Agent:
         bddAgent = Agent(
-            name = "BddAgent",
+            name="BddAgent",
             instructions=system_prompt,
-            model="gpt-4o-mini",
-            mcp_servers=mcp_servers
+            model="gpt-5-mini",
+            mcp_servers=mcp_servers,
         )
 
-        return bddAgent;
-
+        return bddAgent
 
     async def run(self):
         mcp_servers = []
@@ -134,7 +148,7 @@ class BDDAgent:
 
             # --- Run the BDD agent ---
             bddAgent = await self.getBddAgent(mcp_servers)
-            #with trace("Bdd-Python"):  # ✅ use async context manager
+            # with trace("Bdd-Python"):  # ✅ use async context manager
             #    await Runner.run(bddAgent, self.bdd_prompt, max_turns=60)
 
             max_retries = 5
@@ -153,7 +167,9 @@ class BDDAgent:
                             retry_delay = float(match.group(1)) + 2
                         else:
                             retry_delay *= 1.5  # exponential backoff
-                        print(f"⚠️ Rate limit hit (attempt {attempt}/{max_retries}). Retrying in {retry_delay} seconds...")
+                        print(
+                            f"⚠️ Rate limit hit (attempt {attempt}/{max_retries}). Retrying in {retry_delay} seconds..."
+                        )
                         await asyncio.sleep(retry_delay)
                         continue
                     else:
@@ -177,12 +193,14 @@ class BDDAgent:
 
             await asyncio.sleep(5.0)
             print("\n🛑 All MCP servers closed.\n")
-      
+
+
 def ignore_anyio_cancel_error(loop, context):
     msg = context.get("exception")
     if isinstance(msg, RuntimeError) and "Attempted to exit cancel scope" in str(msg):
         return  # swallow it
     loop.default_exception_handler(context)
+
 
 def load_bdd_prompt(prompt_path) -> str:
     """Load Gerkin prompt"""
@@ -190,7 +208,8 @@ def load_bdd_prompt(prompt_path) -> str:
     if tprompt_path.exists():
         return tprompt_path.read_text()
 
-    return "";
+    return ""
+
 
 async def main():
     prompt = load_bdd_prompt("prompt/bdd_prompt2.feature")
@@ -201,12 +220,13 @@ async def main():
     # Allow background MCP cleanup
     await asyncio.sleep(2.0)
 
+
 if __name__ == "__main__":
     try:
-        #asyncio.get_event_loop().set_exception_handler(ignore_anyio_cancel_error)
+        # asyncio.get_event_loop().set_exception_handler(ignore_anyio_cancel_error)
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\n🛑 Interrupted by user. Cleaning up...")
 
 
-#To run: uv run bddAgent.py
+# To run: uv run bddAgent.py

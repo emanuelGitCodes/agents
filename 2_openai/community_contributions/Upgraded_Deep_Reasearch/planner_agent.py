@@ -7,12 +7,13 @@ HOW_MANY_SEARCHES = 20
 
 INSTRUCTIONS = """
 You are a helpful research assistant. You will be given:
-  • Original query  
-  • A list of clarifying questions AND their answers  
-Using that, come up with a set of 20 focused web-search queries 
-that best answer the refined question.  
+  • Original query
+  • A list of clarifying questions AND their answers
+Using that, come up with a set of 20 focused web-search queries
+that best answer the refined question.
 Return a WebSearchPlan as before.
 """
+
 
 class WebSearchItem(BaseModel):
     reason: str
@@ -21,13 +22,15 @@ class WebSearchItem(BaseModel):
     query: str
     "The search term to use for the web search."
 
+
 class WebSearchPlan(BaseModel):
     searches: list[WebSearchItem]
     """A list of web searches to perform to best answer the query."""
 
+
 planner_agent = Agent(
     name="PlannerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=WebSearchPlan,
 )

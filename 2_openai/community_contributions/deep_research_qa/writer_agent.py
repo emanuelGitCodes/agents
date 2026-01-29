@@ -8,7 +8,6 @@ INSTRUCTIONS = (
     "flow of the report. Then, generate the report and return that as your final output.\n"
     "The final output should be in markdown format, and it should be lengthy and detailed. Aim "
     "for 5-10 pages of content, at least 1000 words.\n\n"
-    
     "IMPORTANT SOURCE HANDLING:\n"
     "- Preserve all source URLs and references from the research summaries\n"
     "- Include inline citations throughout your report using the format: [Source Name](URL)\n"
@@ -34,6 +33,6 @@ class ReportData(BaseModel):
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ReportData,
 )

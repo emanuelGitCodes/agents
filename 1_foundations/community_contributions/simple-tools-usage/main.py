@@ -7,17 +7,20 @@ openai = OpenAI()
 
 call_to_action = "Type something to manipulate, or 'exit' to quit."
 
+
 def smart_capitalize(word):
     for i, c in enumerate(word):
         if c.isalpha():
-            return word[:i] + c.upper() + word[i+1:].lower()
+            return word[:i] + c.upper() + word[i + 1 :].lower()
     return word  # no letters to capitalize
+
 
 def manipulate_string(input_string):
     input_string = input_string[::-1]
-    words = re.split(r'\s+', input_string.strip())
+    words = re.split(r"\s+", input_string.strip())
     capitalized_words = [smart_capitalize(word) for word in words]
-    return ' '.join(capitalized_words)
+    return " ".join(capitalized_words)
+
 
 manipulate_string_json = {
     "name": "manipulate_string",
@@ -27,19 +30,18 @@ manipulate_string_json = {
         "properties": {
             "input_string": {
                 "type": "string",
-                "description": "The text the user enters"
+                "description": "The text the user enters",
             }
         },
         "required": ["input_string"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 tools = [{"type": "function", "function": manipulate_string_json}]
 
-TOOL_FUNCTIONS = {
-    "manipulate_string": manipulate_string
-}
+TOOL_FUNCTIONS = {"manipulate_string": manipulate_string}
+
 
 def handle_tool_calls(tool_calls):
     results = []
@@ -52,12 +54,11 @@ def handle_tool_calls(tool_calls):
         # Remove quotes if result is a plain string
         content = result if isinstance(result, str) else json.dumps(result)
 
-        results.append({
-            "role": "tool",
-            "content": content,
-            "tool_call_id": tool_call.id
-        })
+        results.append(
+            {"role": "tool", "content": content, "tool_call_id": tool_call.id}
+        )
     return results
+
 
 system_prompt = f"""You are a helpful assistant who takes text from the user and manipulates it in various ways.
 Currently you do the following:
@@ -70,11 +71,18 @@ After outputting the text, prompt the user for the next input text with {call_to
 With this context, please chat with the user, always staying in character.
 """
 
+
 def chat(message, history):
-    messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
-    done=False
+    messages = (
+        [{"role": "system", "content": system_prompt}]
+        + history
+        + [{"role": "user", "content": message}]
+    )
+    done = False
     while not done:
-        response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=tools)
+        response = openai.chat.completions.create(
+            model="gpt-5-mini", messages=messages, tools=tools
+        )
         finish_reason = response.choices[0].finish_reason
 
         if finish_reason == "tool_calls":
@@ -86,6 +94,7 @@ def chat(message, history):
         else:
             done = True
     return response.choices[0].message.content
+
 
 def main():
     print("\nWelcome to the string manipulation chat!")
@@ -102,6 +111,7 @@ def main():
         history.append({"role": "user", "content": user_input})
         history.append({"role": "assistant", "content": response})
         print(response)
+
 
 if __name__ == "__main__":
     main()

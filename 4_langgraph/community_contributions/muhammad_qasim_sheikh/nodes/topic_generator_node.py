@@ -5,16 +5,21 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-llm = ChatOpenAI(model="gpt-4o-mini")
+llm = ChatOpenAI(model="gpt-5-mini")
+
 
 class GeneratedTopics(BaseModel):
     topics: list[str] = Field(description="Three relevant research topics.")
+
 
 def topic_generator_node(state: ResearchState) -> ResearchState:
     print("EXECUTING: TOPIC GENERATOR NODE")
     structured_llm = llm.with_structured_output(GeneratedTopics)
     qa_pairs = "\n".join(
-        f"Q: {q}\nA: {a}" for q, a in zip(state.clarifying_questions or [], state.clarifying_answers or [])
+        f"Q: {q}\nA: {a}"
+        for q, a in zip(
+            state.clarifying_questions or [], state.clarifying_answers or []
+        )
     )
 
     full_context = f"""
@@ -31,7 +36,7 @@ def topic_generator_node(state: ResearchState) -> ResearchState:
     2. Clarification transcript: It is the transcript of the clarifying questions the user was asked and their answers.
     Your job is to analyze this entire information and generate 3 concise, relevant research topics.
     """
-    
+
     if state.feedback and not state.is_acceptable:
         print(f"RETRYING Topic Generation (Attempt {state.retry_count + 1})")
         prompt += f"""

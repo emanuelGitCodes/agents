@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from agents import Agent
 
-INSTRUCTIONS = """You are a medical content guardrail. Your job is to determine if a user query is 
+INSTRUCTIONS = """You are a medical content guardrail. Your job is to determine if a user query is
 related to medical, health, clinical, or healthcare topics that are appropriate for medical literature research.
 
 A query is ACCEPTABLE if it relates to:
@@ -27,15 +27,20 @@ If unsure, lean towards acceptance if there's any medical relevance."""
 
 
 class GuardrailDecision(BaseModel):
-    is_medical: bool = Field(description="True if the query is medical/health-related and appropriate for medical research, False otherwise")
-    reasoning: str = Field(description="Brief explanation of why the query is or isn't medical/health-related")
-    suggested_redirect: str = Field(description="If not medical, suggest what type of research tool would be more appropriate (e.g., 'general research', 'technical research'). Leave empty if medical.")
+    is_medical: bool = Field(
+        description="True if the query is medical/health-related and appropriate for medical research, False otherwise"
+    )
+    reasoning: str = Field(
+        description="Brief explanation of why the query is or isn't medical/health-related"
+    )
+    suggested_redirect: str = Field(
+        description="If not medical, suggest what type of research tool would be more appropriate (e.g., 'general research', 'technical research'). Leave empty if medical."
+    )
 
 
 medical_guardrail_agent = Agent(
     name="MedicalGuardrailAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=GuardrailDecision,
 )
-

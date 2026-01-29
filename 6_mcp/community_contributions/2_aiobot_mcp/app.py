@@ -17,13 +17,12 @@ load_dotenv()
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Constants
-MODEL = os.getenv("MODEL", "gpt-4o-mini")
+MODEL = os.getenv("MODEL", "gpt-5-mini")
 MAX_ACTIVITIES = 10
 
 SYSTEM_PROMPT = """
@@ -172,7 +171,9 @@ class ActivityAssistant:
             Returns:
                 Dictionary containing event data
             """
-            logger.info(f"Searching events in {city}, {country_code} (date: {start_date}, keywords: {keywords})")
+            logger.info(
+                f"Searching events in {city}, {country_code} (date: {start_date}, keywords: {keywords})"
+            )
             try:
                 # Convert date to ISO format with timezone
                 if start_date:
@@ -223,10 +224,7 @@ class ActivityAssistant:
         logger.info(f"Received message: {message[:100]}...")
 
         # Run agent with just the message
-        result = await Runner.run(
-            self.agent,
-            message
-        )
+        result = await Runner.run(self.agent, message)
 
         response = result.final_output or "Sorry, I couldn't generate a response."
         logger.info(f"Generated response ({len(response)} chars)")
@@ -260,7 +258,7 @@ def create_ui(assistant: ActivityAssistant):
         examples=[
             "What can I do in Paris this weekend?",
             "Suggest activities for tomorrow in London",
-            "What's happening in New York next week?"
+            "What's happening in New York next week?",
         ],
         chatbot=gr.Chatbot(height=500),
     )

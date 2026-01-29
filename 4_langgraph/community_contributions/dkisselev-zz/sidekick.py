@@ -17,8 +17,7 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,9 @@ class State(TypedDict):
 
 class EvaluatorOutput(BaseModel):
     feedback: str = Field(description="Feedback on the assistant's response")
-    success_criteria_met: bool = Field(description="Whether the success criteria have been met")
+    success_criteria_met: bool = Field(
+        description="Whether the success criteria have been met"
+    )
     user_input_needed: bool = Field(
         description="True if more input is needed from the user, or clarifications, or the assistant is stuck"
     )
@@ -56,16 +57,18 @@ class Sidekick:
     async def setup(self):
         self.tools, self.browser, self.playwright = await playwright_tools()
         self.tools += await other_tools()
-        worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
-        evaluator_llm = ChatOpenAI(model="gpt-4o-mini")
-        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(EvaluatorOutput)
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
+        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
+            EvaluatorOutput
+        )
         await self.build_graph()
 
     def worker(self, state: State) -> Dict[str, Any]:
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info("WORKER NODE: Processing request")
-        
+
         system_message = f"""You are a helpful assistant that can use tools to complete tasks.
     You keep working on a task until either you have a question or clarification for the user, or the success criteria is met.
     You have many tools to help you, including tools to browse the internet, navigating and retrieving web pages.
@@ -104,25 +107,34 @@ class Sidekick:
         # Invoke the LLM with tools
         logger.info("Invoking LLM with tools...")
         response = self.worker_llm_with_tools.invoke(messages)
-        
+
         # Log tool calls if any
         if hasattr(response, "tool_calls") and response.tool_calls:
             logger.info(f"TOOL CALLS DETECTED: {len(response.tool_calls)} tool(s)")
             for i, tool_call in enumerate(response.tool_calls):
                 # Handle both dict and object formats
-                tool_name = tool_call.get('name') if isinstance(tool_call, dict) else getattr(tool_call, 'name', 'unknown')
+                tool_name = (
+                    tool_call.get("name")
+                    if isinstance(tool_call, dict)
+                    else getattr(tool_call, "name", "unknown")
+                )
                 logger.info(f"  Tool {i+1}: {tool_name}")
-                
+
                 # Extract arguments
                 if isinstance(tool_call, dict):
-                    args = tool_call.get('args', {})
+                    args = tool_call.get("args", {})
                 else:
-                    args = getattr(tool_call, 'args', {})
-                
+                    args = getattr(tool_call, "args", {})
+
                 # Log Python code if it's the Python REPL
-                if tool_name == 'Python_REPL':
+                if tool_name == "Python_REPL":
                     # Try different possible argument names
-                    code = args.get('query') or args.get('code') or args.get('command') or str(args)
+                    code = (
+                        args.get("query")
+                        or args.get("code")
+                        or args.get("command")
+                        or str(args)
+                    )
                     logger.info(f"  PYTHON CODE TO EXECUTE:")
                     logger.info(f"  {'-'*60}")
                     logger.info(f"  {code}")
@@ -217,29 +229,38 @@ class Sidekick:
 
         # Create a custom tool node with logging
         def logged_tool_node(state: State):
-            logger.info("="*80)
+            logger.info("=" * 80)
             logger.info("TOOL NODE: Executing tools")
             last_message = state["messages"][-1]
-            
+
             # Log which tools are being called
             if hasattr(last_message, "tool_calls") and last_message.tool_calls:
                 for tool_call in last_message.tool_calls:
-                    tool_name = tool_call.get('name') if isinstance(tool_call, dict) else getattr(tool_call, 'name', 'unknown')
+                    tool_name = (
+                        tool_call.get("name")
+                        if isinstance(tool_call, dict)
+                        else getattr(tool_call, "name", "unknown")
+                    )
                     logger.info(f"  Executing tool: {tool_name}")
-                    
+
                     # Log the code being sent
-                    if tool_name == 'Python_REPL':
+                    if tool_name == "Python_REPL":
                         if isinstance(tool_call, dict):
-                            args = tool_call.get('args', {})
+                            args = tool_call.get("args", {})
                         else:
-                            args = getattr(tool_call, 'args', {})
-                        code = args.get('query') or args.get('code') or args.get('command') or str(args)
+                            args = getattr(tool_call, "args", {})
+                        code = (
+                            args.get("query")
+                            or args.get("code")
+                            or args.get("command")
+                            or str(args)
+                        )
                         logger.info(f" Sending to Azure: {code[:200]}")
-            
+
             # Execute the tools
             tool_node = ToolNode(tools=self.tools)
             result = tool_node.invoke(state)
-            
+
             # Log tool results
             if result and "messages" in result:
                 for msg in result["messages"]:
@@ -250,7 +271,7 @@ class Sidekick:
                         if len(str(msg.content)) > 500:
                             logger.info(f"  ... (truncated)")
                         logger.info(f"  {'-'*60}")
-            
+
             return result
 
         # Add nodes
@@ -264,7 +285,9 @@ class Sidekick:
         )
         graph_builder.add_edge("tools", "worker")
         graph_builder.add_conditional_edges(
-            "evaluator", self.route_based_on_evaluation, {"worker": "worker", "END": END}
+            "evaluator",
+            self.route_based_on_evaluation,
+            {"worker": "worker", "END": END},
         )
         graph_builder.add_edge(START, "worker")
 
@@ -272,26 +295,27 @@ class Sidekick:
         self.graph = graph_builder.compile(checkpointer=self.memory)
 
     async def run_superstep(self, message, success_criteria, history):
-        logger.info("\n" + "="*80)
+        logger.info("\n" + "=" * 80)
         logger.info(f"NEW REQUEST: {message[:100]}...")
         logger.info(f"Success Criteria: {success_criteria}")
-        logger.info("="*80 + "\n")
-        
+        logger.info("=" * 80 + "\n")
+
         config = {"configurable": {"thread_id": self.sidekick_id}}
 
         state = {
             "messages": message,
-            "success_criteria": success_criteria or "The answer should be clear and accurate",
+            "success_criteria": success_criteria
+            or "The answer should be clear and accurate",
             "feedback_on_work": None,
             "success_criteria_met": False,
             "user_input_needed": False,
         }
         result = await self.graph.ainvoke(state, config=config)
-        
-        logger.info("\n" + "="*80)
+
+        logger.info("\n" + "=" * 80)
         logger.info("REQUEST COMPLETE")
-        logger.info("="*80 + "\n")
-        
+        logger.info("=" * 80 + "\n")
+
         user = {"role": "user", "content": message}
         reply = {"role": "assistant", "content": result["messages"][-2].content}
         feedback = {"role": "assistant", "content": result["messages"][-1].content}

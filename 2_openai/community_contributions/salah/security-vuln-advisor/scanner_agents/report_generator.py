@@ -47,7 +47,7 @@ Provide:
 Keep action items concise. Focus on business impact, practical commands, and CVE details.
 """
 
-    def __init__(self, model: str = "gpt-4o-mini"):
+    def __init__(self, model: str = "gpt-5-mini"):
         self.model = model
         self.agent = self._create_agent()
         logger.info("ReportGeneratorAgent initialized")

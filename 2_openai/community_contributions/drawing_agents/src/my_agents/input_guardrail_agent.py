@@ -1,4 +1,11 @@
-from agents import Agent, input_guardrail, RunContextWrapper, TResponseInputItem, GuardrailFunctionOutput, Runner
+from agents import (
+    Agent,
+    input_guardrail,
+    RunContextWrapper,
+    TResponseInputItem,
+    GuardrailFunctionOutput,
+    Runner,
+)
 from pydantic import BaseModel
 
 from context.app_context import AppContext
@@ -16,14 +23,14 @@ class DrawingRequestOutput(BaseModel):
 input_guardrail_agent = Agent[AppContext](
     name="Input guardrail agent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
-    output_type=DrawingRequestOutput
+    model="gpt-5-mini",
+    output_type=DrawingRequestOutput,
 )
 
 
 @input_guardrail
 async def drawing_guardrail(
-        ctx: RunContextWrapper[None], agent: Agent, input: str | list[TResponseInputItem]
+    ctx: RunContextWrapper[None], agent: Agent, input: str | list[TResponseInputItem]
 ) -> GuardrailFunctionOutput:
     result = await Runner.run(input_guardrail_agent, input, context=ctx.context)
 

@@ -1,6 +1,7 @@
 """
 Simple FastAPI application for the Deep Research Agent System
 """
+
 import logging
 import asyncio
 import uuid
@@ -12,11 +13,13 @@ from pydantic import BaseModel
 from typing import Optional
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Import our existing modules
 import sys
 import os
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agents_manager import AgentManager
@@ -29,20 +32,20 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Deep Research Agent System API",
     description="A simple API for automated research using AI agents",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Global storage for research sessions
 research_sessions = {}
 
 # Initialize configuration and agent manager
-agent_manager = AgentManager(model_name="gpt-4o-mini")
+agent_manager = AgentManager(model_name="gpt-5-mini")
 
 
 # Pydantic models for API requests/responses
 class ResearchRequest(BaseModel):
     query: str
-    model: Optional[str] = "gpt-4o-mini"
+    model: Optional[str] = "gpt-5-mini"
 
 
 class ResearchResponse(BaseModel):
@@ -67,8 +70,8 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "POST /research": "Start a new research session",
-            "GET /research/{session_id}": "Get research status and results"
-        }
+            "GET /research/{session_id}": "Get research status and results",
+        },
     }
 
 
@@ -78,26 +81,26 @@ async def start_research(request: ResearchRequest):
     try:
         # Generate unique session ID
         session_id = str(uuid.uuid4())
-        
+
         # Store session info
         research_sessions[session_id] = {
             "query": request.query,
             "status": "started",
             "created_at": datetime.now(),
-            "model": request.model
+            "model": request.model,
         }
-        
+
         # Start research in background
         asyncio.create_task(run_research(session_id, request.query, request.model))
-        
+
         logger.info(f"Started research session {session_id} for query: {request.query}")
-        
+
         return ResearchResponse(
             session_id=session_id,
             status="started",
-            message="Research session started successfully"
+            message="Research session started successfully",
         )
-        
+
     except Exception as e:
         logger.error(f"Failed to start research: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -108,15 +111,15 @@ async def get_research_status(session_id: str):
     """Get the status and results of a research session"""
     if session_id not in research_sessions:
         raise HTTPException(status_code=404, detail="Research session not found")
-    
+
     session = research_sessions[session_id]
-    
+
     return ResearchStatusResponse(
         session_id=session_id,
         status=session["status"],
         query=session["query"],
         report=session.get("report"),
-        error=session.get("error")
+        error=session.get("error"),
     )
 
 
@@ -124,24 +127,26 @@ async def run_research(session_id: str, query: str, model: str):
     """Background task to run the research pipeline"""
     try:
         research_sessions[session_id]["status"] = "in_progress"
-        
+
         logger.info(f"Starting research for session {session_id}")
-        
+
         # Update agent manager configuration
         agent_manager.model_name = model
-        
+
         # Run the research pipeline
         report = await agent_manager.run(query)
-        
+
         if report:
             research_sessions[session_id]["status"] = "completed"
             research_sessions[session_id]["report"] = report.markdown_report
             logger.info(f"Research completed for session {session_id}")
         else:
             research_sessions[session_id]["status"] = "failed"
-            research_sessions[session_id]["error"] = "Research pipeline failed to produce a report"
+            research_sessions[session_id][
+                "error"
+            ] = "Research pipeline failed to produce a report"
             logger.error(f"Research failed for session {session_id}")
-            
+
     except Exception as e:
         research_sessions[session_id]["status"] = "failed"
         research_sessions[session_id]["error"] = str(e)
@@ -150,4 +155,5 @@ async def run_research(session_id: str, query: str, model: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

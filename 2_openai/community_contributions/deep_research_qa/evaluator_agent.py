@@ -2,24 +2,26 @@ from pydantic import BaseModel
 from typing import List
 from agents import Agent
 
+
 class EvaluationResult(BaseModel):
     overall_score: int
     """Overall quality score from 1-10"""
-    
+
     strengths: List[str]
     """List of report strengths"""
-    
+
     weaknesses: List[str]
     """List of areas needing improvement"""
-    
+
     suggestions: List[str]
     """Specific suggestions for improvement"""
-    
+
     needs_refinement: bool
     """Whether the report needs to be refined"""
-    
+
     refined_requirements: str
     """If refinement needed, what specific requirements should guide it"""
+
 
 EVALUATION_INSTRUCTIONS = """
 You are a Research Quality Evaluator. Your job is to assess the quality of research reports and determine if they need refinement.
@@ -46,7 +48,7 @@ If needs_refinement is True, provide specific, actionable requirements for impro
 evaluator_agent = Agent(
     name="Research Evaluator",
     instructions=EVALUATION_INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=EvaluationResult,
 )
 
@@ -54,9 +56,10 @@ evaluator_agent = Agent(
 class OptimizedReport(BaseModel):
     improved_markdown_report: str
     """The refined and improved version of the report"""
-    
+
     optimization_notes: str
     """Notes on what was improved and why"""
+
 
 OPTIMIZER_INSTRUCTIONS = """
 You are a Research Report Optimizer. You receive:
@@ -77,8 +80,8 @@ Keep all factual content accurate - only improve presentation, structure, and co
 """
 
 optimizer_agent = Agent(
-    name="Research Optimizer", 
+    name="Research Optimizer",
     instructions=OPTIMIZER_INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=OptimizedReport,
-) 
+)

@@ -4,7 +4,7 @@ from agents import Agent, Runner, trace
 from agents.mcp import MCPServerStdio
 
 load_dotenv(override=True)
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "gpt-5-mini"
 
 INSTRUCTIONS = """
 You are a helpful Holiday Checker assistant. You can:

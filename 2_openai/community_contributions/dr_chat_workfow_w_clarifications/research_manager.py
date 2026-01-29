@@ -13,8 +13,8 @@ INSTRUCTIONS = f"""
 
     Follow these steps carefully:
 
-    1. If the query is unclear, ask the user for clarifications and respond with a ResearchResponse object with the type 'follow_up' 
-    and the questions to ask the user.  If the user's clarifications are not clear you make ask for more clarifications up to {HOW_MANY_CLARIFICATIONS} 
+    1. If the query is unclear, ask the user for clarifications and respond with a ResearchResponse object with the type 'follow_up'
+    and the questions to ask the user.  If the user's clarifications are not clear you make ask for more clarifications up to {HOW_MANY_CLARIFICATIONS}
     more times.
     2. Generate search terms: Use the planner_agent tool to generate a list of search terms for the query.
     3. Perform searches: Use the search_agent tool to perform the searches for the search terms.
@@ -29,11 +29,16 @@ INSTRUCTIONS = f"""
     for 5-10 pages of content, at least 1000 words."""
 
 
-
 class ResearchResponse(BaseModel):
-    type: str = Field(description="The type of response, either 'follow_up' or 'answer'")
-    questions: list[str] = Field(description="A list of questions to ask the user if the type is 'follow_up'")
-    content: str = Field(description="The content of the response if the type is 'answer'")
+    type: str = Field(
+        description="The type of response, either 'follow_up' or 'answer'"
+    )
+    questions: list[str] = Field(
+        description="A list of questions to ask the user if the type is 'follow_up'"
+    )
+    content: str = Field(
+        description="The content of the response if the type is 'answer'"
+    )
 
 
 class ResearchManager:
@@ -43,8 +48,8 @@ class ResearchManager:
             name="Research Manager",
             instructions=INSTRUCTIONS,
             tools=[planner_tool, search_tool, writer_tool],
-            model="gpt-4o-mini",
-            output_type=ResearchResponse
+            model="gpt-5-mini",
+            output_type=ResearchResponse,
         )
 
         self.session = SQLiteSession("research_session.db")
@@ -55,17 +60,13 @@ class ResearchManager:
 
         if self.trace_id is None:
             self.trace_id = gen_trace_id()
-        
+
         with trace("Research trace", trace_id=self.trace_id):
-            print(f"View trace: https://platform.openai.com/traces/trace?trace_id={self.trace_id}")
-            
+            print(
+                f"View trace: https://platform.openai.com/traces/trace?trace_id={self.trace_id}"
+            )
+
             result = await Runner.run(
-                self.manager_agent,
-                f"{input_type}: {user_input}",
-                session=self.session
+                self.manager_agent, f"{input_type}: {user_input}", session=self.session
             )
             return result.final_output_as(ResearchResponse)
-
-
-    
-

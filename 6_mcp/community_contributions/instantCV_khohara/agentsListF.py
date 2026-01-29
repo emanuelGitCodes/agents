@@ -2,7 +2,7 @@ import os
 from agents import Agent, Runner, trace
 from agents.mcp import MCPServerStdio
 
-model = "gpt-4.1-mini"
+model = "gpt-5-mini"
 
 def get_fileserver_params():
     return {

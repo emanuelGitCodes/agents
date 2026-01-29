@@ -7,39 +7,39 @@ from typing import Dict
 def search_clinical_trials(query: str, max_results: int = 10) -> Dict[str, any]:
     """
     Search ClinicalTrials.gov for relevant clinical trials.
-    
+
     Args:
         query: Search query (e.g., "NSCLC EGFR T790M")
         max_results: Maximum number of results to return (default 10)
-    
+
     Returns:
         Dictionary containing clinical trial information
     """
     try:
         # ClinicalTrials.gov API v2
         base_url = "https://clinicaltrials.gov/api/v2/studies"
-        
+
         params = {
             "query.term": query,
             "pageSize": max_results,
             "format": "json",
-            "fields": "NCTId,BriefTitle,OverallStatus,Phase,Condition,InterventionName,PrimaryOutcomeMeasure,StudyFirstPostDate"
+            "fields": "NCTId,BriefTitle,OverallStatus,Phase,Condition,InterventionName,PrimaryOutcomeMeasure,StudyFirstPostDate",
         }
-        
+
         response = requests.get(base_url, params=params, timeout=15)
         response.raise_for_status()
         data = response.json()
-        
+
         studies = data.get("studies", [])
-        
+
         if not studies:
             return {
                 "success": True,
                 "count": 0,
                 "trials": [],
-                "message": "No clinical trials found for this query"
+                "message": "No clinical trials found for this query",
             }
-        
+
         trials = []
         for study in studies:
             protocol_section = study.get("protocolSection", {})
@@ -49,44 +49,47 @@ def search_clinical_trials(query: str, max_results: int = 10) -> Dict[str, any]:
             conditions = protocol_section.get("conditionsModule", {})
             interventions = protocol_section.get("armsInterventionsModule", {})
             outcomes = protocol_section.get("outcomesModule", {})
-            
+
             nct_id = identification.get("nctId", "")
-            
-            trials.append({
-                "nct_id": nct_id,
-                "title": identification.get("briefTitle", ""),
-                "status": status.get("overallStatus", ""),
-                "phase": design.get("phases", ["N/A"]),
-                "conditions": conditions.get("conditions", []),
-                "interventions": [
-                    interv.get("name", "") 
-                    for interv in interventions.get("interventions", [])
-                ][:5],  # Limit to 5 interventions
-                "primary_outcome": outcomes.get("primaryOutcomes", [{}])[0].get("measure", "") if outcomes.get("primaryOutcomes") else "",
-                "first_posted": status.get("studyFirstPostDate", ""),
-                "url": f"https://clinicaltrials.gov/study/{nct_id}"
-            })
-        
-        return {
-            "success": True,
-            "count": len(trials),
-            "trials": trials,
-            "query": query
-        }
-        
+
+            trials.append(
+                {
+                    "nct_id": nct_id,
+                    "title": identification.get("briefTitle", ""),
+                    "status": status.get("overallStatus", ""),
+                    "phase": design.get("phases", ["N/A"]),
+                    "conditions": conditions.get("conditions", []),
+                    "interventions": [
+                        interv.get("name", "")
+                        for interv in interventions.get("interventions", [])
+                    ][
+                        :5
+                    ],  # Limit to 5 interventions
+                    "primary_outcome": (
+                        outcomes.get("primaryOutcomes", [{}])[0].get("measure", "")
+                        if outcomes.get("primaryOutcomes")
+                        else ""
+                    ),
+                    "first_posted": status.get("studyFirstPostDate", ""),
+                    "url": f"https://clinicaltrials.gov/study/{nct_id}",
+                }
+            )
+
+        return {"success": True, "count": len(trials), "trials": trials, "query": query}
+
     except requests.RequestException as e:
         return {
             "success": False,
             "error": f"ClinicalTrials.gov API error: {str(e)}",
             "count": 0,
-            "trials": []
+            "trials": [],
         }
     except Exception as e:
         return {
             "success": False,
             "error": f"Unexpected error: {str(e)}",
             "count": 0,
-            "trials": []
+            "trials": [],
         }
 
 
@@ -107,6 +110,5 @@ clinical_trials_agent = Agent(
     name="ClinicalTrialsAgent",
     instructions=INSTRUCTIONS,
     tools=[search_clinical_trials],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
-

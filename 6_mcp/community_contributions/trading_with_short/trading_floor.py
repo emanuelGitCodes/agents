@@ -25,14 +25,14 @@ lastnames = ["Patience", "Bold", "Systematic", "Crypto"]
 
 if USE_MANY_MODELS:
     model_names = [
-        "gpt-4.1-mini",
+        "gpt-5-mini",
         "deepseek-chat",
-        "gemini-2.5-flash",
+        "gemini-3-flash-preview",
         "grok-3-mini-beta",
     ]
     short_model_names = ["GPT 4.1 Mini", "DeepSeek V3", "Gemini 2.5 Flash", "Grok 3 Mini"]
 else:
-    model_names = ["gpt-4.1-mini"] * 4
+    model_names = ["gpt-5-mini"] * 4
     short_model_names = ["GPT 4.1 mini"] * 4
 
 

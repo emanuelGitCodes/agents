@@ -17,11 +17,11 @@ when true the 4 traders are reset to their starting values.
 
 USE_MANY_MODELS = os.getenv("USE_MANY_MODELS", "false").strip().lower() == "true"
 
-when true these models will be used, otherwise they all use gpt-4.1-mini
+when true these models will be used, otherwise they all use gpt-5-mini
     model_names = [
-        "gpt-4.1-mini",
+        "gpt-5-mini",
         "deepseek-chat",
-        "gemini-2.5-flash",
+        "gemini-3-flash-preview",
         "grok-3-mini-beta",
     ]
 

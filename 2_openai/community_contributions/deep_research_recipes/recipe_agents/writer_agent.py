@@ -28,14 +28,20 @@ Guidelines:
 class Ingredient(BaseModel):
     name: str = Field(description="Name of the ingredient, e.g. 'olive oil'")
     quantity: str = Field(description="Human-readable amount, e.g. '2 tbsp', '500 g'")
-    notes: str | None = Field(default=None, description="Optional notes, e.g. 'extra-virgin'")
+    notes: str | None = Field(
+        default=None, description="Optional notes, e.g. 'extra-virgin'"
+    )
 
 
 class RecipeData(BaseModel):
     cuisine: str = Field(description="Cuisine name, e.g. 'Italian'")
     title: str = Field(description="Recipe title")
-    servings: int | None = Field(default=None, description="Approximate number of servings")
-    ingredients: list[Ingredient] = Field(description="List of ingredients with quantities")
+    servings: int | None = Field(
+        default=None, description="Approximate number of servings"
+    )
+    ingredients: list[Ingredient] = Field(
+        description="List of ingredients with quantities"
+    )
     steps: list[str] = Field(description="Ordered cooking steps")
     shopping_list_markdown: str = Field(
         description="Shopping list as markdown bullet points (e.g. '- 500 g pasta')."
@@ -45,6 +51,6 @@ class RecipeData(BaseModel):
 recipe_writer_agent = Agent(
     name="RecipeWriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=RecipeData,
 )

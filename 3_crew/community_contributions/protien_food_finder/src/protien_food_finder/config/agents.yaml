@@ -5,7 +5,7 @@ store_locator:
     Find grocery stores near {location} that are well stocked with fresh, frozen, and shelf stable protein foods.
   backstory: >
     You are an expert in local grocery retail with deep knowledge of store locations and their specialties. You know which stores in any area offer the best selection of high-protein foods. You use search tools to identify stores within a reasonable distance from the user's location.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
   verbose: true
   allow_delegation: false
 nutrition_researcher:
@@ -21,7 +21,7 @@ nutrition_researcher:
     food items. You use search tools to gather current information
     about products at specific stores.
     Make sure to organise the products by category and sub-category with clear and concise headings.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
   verbose: true
   allow_delegation: false
 nutrition_validator:
@@ -35,7 +35,7 @@ nutrition_validator:
     nutritional information. You carefully verify protein content,
     check for dietary restrictions, and ensure all product information
     is accurate and complete before recommendations are made.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
   verbose: true
   allow_delegation: false
 
@@ -56,7 +56,7 @@ store_specialist_template:
     searches (site:{store_website}), and community discussions. You provide detailed
     nutritional information including protein content, serving sizes, prices, and
     dietary flags (gluten-free, contains beef/pork/turkey/tuna).
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
   verbose: true
   allow_delegation: false
 
@@ -71,6 +71,6 @@ recommendation_specialist:
     extensive knowledge of grocery store products and their
     nutritional content. You excel at creating personalized recommendations
     based on the user's dietary preferences and available options.
-  llm: gpt-4o-mini
+  llm: gpt-5-mini
   verbose: true
   allow_delegation: false

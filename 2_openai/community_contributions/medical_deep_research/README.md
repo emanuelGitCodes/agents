@@ -118,7 +118,7 @@ User Query
    EJS_PUBLIC_KEY=your_emailjs_public_key
    EJS_SERVICE_ID=your_emailjs_service_id
    EJS_TEMPLATE_ID=your_emailjs_template_id
-   
+
    # Optional
    EJS_SELF_EMAIL=your_email@example.com  # For self-copies
    ```
@@ -196,7 +196,7 @@ The email agent formats the report as HTML and sends it via EmailJS to:
 ## Technical Details
 
 ### Models Used
-- **OpenAI GPT-4o-mini** - For all agent operations (planning, searching, writing, evaluation)
+- **OpenAI gpt-5-mini** - For all agent operations (planning, searching, writing, evaluation)
 
 ### APIs Used
 - **OpenAI API** - Agent orchestration and LLM calls
@@ -254,4 +254,3 @@ This project is part of an educational course and is intended for learning purpo
 ---
 
 **Note**: This tool is designed for research and educational purposes. It should not be used as a substitute for professional medical advice, diagnosis, or treatment.
-

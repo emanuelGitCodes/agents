@@ -9,7 +9,9 @@ from agents import Agent, function_tool
 def send_email(subject: str, html_body: str) -> Dict[str, str]:
     try:
         sendgrid_key = os.environ.get("SENDGRID_API_KEY")
-        from_email_addr = os.environ.get("ALERT_FROM_EMAIL", "alerts@devops-monitor.com")
+        from_email_addr = os.environ.get(
+            "ALERT_FROM_EMAIL", "alerts@devops-monitor.com"
+        )
         to_email_addr = os.environ.get("ALERT_TO_EMAIL", "admin@example.com")
         if not sendgrid_key:
             return {"success": False, "error": "SENDGRID_API_KEY not configured"}
@@ -22,7 +24,7 @@ def send_email(subject: str, html_body: str) -> Dict[str, str]:
         return {
             "success": True,
             "status_code": response.status_code,
-            "message": f"Email sent to {to_email_addr}"
+            "message": f"Email sent to {to_email_addr}",
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -122,5 +124,5 @@ email_agent = Agent(
     name="Email Agent",
     instructions=INSTRUCTIONS,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )

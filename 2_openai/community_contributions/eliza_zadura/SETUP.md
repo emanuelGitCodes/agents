@@ -100,7 +100,7 @@ Prospect replies to email
         ↓
     FastAPI /webhook/reply endpoint
         ↓
-    SDR Reply Agent (GPT-4o-mini)
+    SDR Reply Agent (gpt-5-mini)
         ↓
     send_reply tool → Mailjet API
         ↓

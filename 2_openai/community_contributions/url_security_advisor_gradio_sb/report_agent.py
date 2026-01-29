@@ -10,15 +10,23 @@ reporter_agent_instructions = (
     "Include recommendations for next steps or verification, if relevant."
 )
 
+
 class UrlReportData(BaseModel):
     url: str = Field(description="Url that was a subject of analysis")
-    short_summary: str = Field(description="A short 2-3 sentence summary of the URL's safety and risks.")
-    markdown_report: str = Field(description="The detailed final report in markdown format. Embed safly analyzed url on top of report")
-    follow_up_checks: list[str] = Field(description="Suggested additional security checks or monitoring steps.")
+    short_summary: str = Field(
+        description="A short 2-3 sentence summary of the URL's safety and risks."
+    )
+    markdown_report: str = Field(
+        description="The detailed final report in markdown format. Embed safly analyzed url on top of report"
+    )
+    follow_up_checks: list[str] = Field(
+        description="Suggested additional security checks or monitoring steps."
+    )
+
 
 reporter_agent = Agent(
     name="UrlReporterAgent",
     instructions=reporter_agent_instructions,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=UrlReportData,
 )

@@ -16,16 +16,26 @@ INSTRUCTIONS = (
     "Aim for 5-10 pages of content (at least 1000 words)."
 )
 
+
 class ReportData(BaseModel):
-    short_summary: str = Field(description="A concise 2-3 sentence summary of the key findings")
-    markdown_report: str = Field(description="The complete research report in markdown format")
-    key_insights: list[str] = Field(description="List of the most important insights from the research")
-    follow_up_questions: list[str] = Field(description="Suggested topics for further research")
+    short_summary: str = Field(
+        description="A concise 2-3 sentence summary of the key findings"
+    )
+    markdown_report: str = Field(
+        description="The complete research report in markdown format"
+    )
+    key_insights: list[str] = Field(
+        description="List of the most important insights from the research"
+    )
+    follow_up_questions: list[str] = Field(
+        description="Suggested topics for further research"
+    )
     sources: list[str] = Field(description="List of sources referenced in the report")
+
 
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ReportData,
-) 
+)

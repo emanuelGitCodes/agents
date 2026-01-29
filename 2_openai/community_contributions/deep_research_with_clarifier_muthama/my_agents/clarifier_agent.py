@@ -41,38 +41,56 @@ ClarifyingQuestionText = constr(strip_whitespace=True, min_length=10, max_length
 
 class CreateQuestions(BaseModel):
     clarifying_question: ClarifyingQuestionText = Field(
-        ..., description="A concise, open-ended clarifying question (should typically end with a '?')."
+        ...,
+        description="A concise, open-ended clarifying question (should typically end with a '?').",
     )
     question_purpose: OneLine = Field(
-        ..., description="One-line explanation describing why the question helps refine the query."
+        ...,
+        description="One-line explanation describing why the question helps refine the query.",
     )
 
     @field_validator("clarifying_question")
     def ensure_open_ended(cls, clarifying_question: str) -> str:
         # Ensure it looks like a question and is open-ended; disallow leading yes/no phrases
         if not clarifying_question.endswith("?"):
-            raise ValueError("clarifying_question should end with a question mark ('?').")
+            raise ValueError(
+                "clarifying_question should end with a question mark ('?')."
+            )
         return clarifying_question
 
 
 class ClarifyingQuestions(BaseModel):
     """A set of three validated clarifying questions."""
 
-    questions: List[CreateQuestions] = Field(..., description="Exactly three clarifying questions with purposes.")
+    questions: List[CreateQuestions] = Field(
+        ..., description="Exactly three clarifying questions with purposes."
+    )
 
     @model_validator(mode="after")
     def validate_questions(self) -> "ClarifyingQuestions":
         if len(self.questions) != 3:
             raise ValueError("Exactly three clarifying questions are required.")
 
-        expertise_keywords = ("experience", "familiar", "level", "expertise", "skill", "knowledge")
+        expertise_keywords = (
+            "experience",
+            "familiar",
+            "level",
+            "expertise",
+            "skill",
+            "knowledge",
+        )
         has_expertise_question = any(
-            any(k in (q.clarifying_question + " " + q.question_purpose).lower() for k in expertise_keywords)
+            any(
+                k in (q.clarifying_question + " " + q.question_purpose).lower()
+                for k in expertise_keywords
+            )
             for q in self.questions
         )
 
         if not has_expertise_question:
-            raise ValueError("At least one question must assess the user's expertise or familiarity.")
+            raise ValueError(
+                "At least one question must assess the user's expertise or familiarity."
+            )
 
         return self
 
@@ -86,6 +104,6 @@ def validate_model_output(raw: dict) -> ClarifyingQuestions:
 clarifier_agent = Agent(
     name="ClarifierAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ClarifyingQuestions,
 )

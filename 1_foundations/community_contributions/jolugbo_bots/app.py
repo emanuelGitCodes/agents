@@ -17,7 +17,7 @@ if gemini_api_key:
     print(f"Gemini API Key exists and begins {gemini_api_key[:2]}")
 else:
     print("Gemini API Key not set - please head to the troubleshooting guide in the setup folder")
-    
+
 openai = OpenAI()
 
 # request = "come up with an online business idea that can be executed entierly with AI and would be very profitable,"
@@ -31,7 +31,7 @@ response = openai.chat.completions.create(
 )
 idea = response.choices[0].message.content
 print("Business Idea:", idea)
-competitors = ["gpt-4.1-mini"]
+competitors = ["gpt-5-mini"]
 #"Gemini 3 Flash (Preview)","Gemini 2.5 Flash-Lite","Gemini 2.5 Flash"
 answers = []
 messages = [{"role": "user", "content": f"Provide a detailed plan to execute the following business idea: {idea} inclusive of steps to take, tools to use and marketing strategies, expected revenue duration on cost "}]
@@ -40,6 +40,6 @@ for competitor in competitors:
         model=competitor,
         messages=messages,
     )
-    answers.append((competitor, response.choices[0].message.content))   
+    answers.append((competitor, response.choices[0].message.content))
 for answer in answers:
     print(f"## Response from {answer[0]}\n\n{answer[1]}")

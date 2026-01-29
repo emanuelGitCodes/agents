@@ -8,8 +8,12 @@ from typing import Dict, Optional, List, TypedDict
 from sendgrid.helpers.mail import Mail, Content, From, To, Personalization
 from agents import Agent, function_tool
 
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 
 
 logger = logging.getLogger("email_agent")
@@ -23,7 +27,7 @@ MAX_SUBJECT_LENGTH = 200
 MAX_BODY_BYTES = 2 * 1024 * 1024
 
 INSTRUCTIONS = """You are able to send a nicely formatted HTML email based on a detailed report.
-You will be provided with a detailed report. You should use your tool to send one email, providing the 
+You will be provided with a detailed report. You should use your tool to send one email, providing the
 report converted into clean, well presented HTML with an appropriate subject line."""
 
 
@@ -67,9 +71,13 @@ def _sanitize_html(html: str) -> str:
 def _get_sendgrid_client() -> "sendgrid.SendGridAPIClient":
     api_key = os.environ.get(SENDGRID_API_KEY_ENV)
     if not api_key:
-        raise ConfigurationError(f"required environment variable {SENDGRID_API_KEY_ENV} not found")
+        raise ConfigurationError(
+            f"required environment variable {SENDGRID_API_KEY_ENV} not found"
+        )
     if sendgrid is None:
-        raise ConfigurationError("sendgrid package is not installed or failed to import")
+        raise ConfigurationError(
+            "sendgrid package is not installed or failed to import"
+        )
     return sendgrid.SendGridAPIClient(api_key=api_key)
 
 
@@ -91,7 +99,9 @@ def _validate_addresses(addr: Optional[str]) -> Optional[str]:
     wait=wait_exponential(multiplier=0.5, min=0.5, max=10),
     retry=retry_if_exception_type(SendGridError),
 )
-def _send_via_sendgrid(subject: str, html_body: str, from_email: str, to_emails: List[str]) -> Dict:
+def _send_via_sendgrid(
+    subject: str, html_body: str, from_email: str, to_emails: List[str]
+) -> Dict:
     """
     Low-level send via SendGrid. Retries for transient 5xx responses or network problems.
     Raises SendGridError on permanent failure.
@@ -108,7 +118,10 @@ def _send_via_sendgrid(subject: str, html_body: str, from_email: str, to_emails:
     mail.add_personalization(personalization)
     mail.add_content(Content("text/html", html_body))
 
-    logger.debug("Sending email via SendGrid", extra={"from": from_email, "tos": to_emails, "subject_len": len(subject)})
+    logger.debug(
+        "Sending email via SendGrid",
+        extra={"from": from_email, "tos": to_emails, "subject_len": len(subject)},
+    )
     response = client.client.mail.send.post(request_body=mail.get())
     status_code = getattr(response, "status_code", None)
     body = None
@@ -131,7 +144,10 @@ def _send_via_sendgrid(subject: str, html_body: str, from_email: str, to_emails:
     if status_code is None:
         raise SendGridError("no status code returned from SendGrid client")
     if 500 <= status_code < 600:
-        logger.warning("SendGrid returned transient error; will retry", extra={"status_code": status_code})
+        logger.warning(
+            "SendGrid returned transient error; will retry",
+            extra={"status_code": status_code},
+        )
         raise SendGridError(f"sendgrid transient error: {status_code}")
 
     if status_code >= 400:
@@ -142,7 +158,12 @@ def _send_via_sendgrid(subject: str, html_body: str, from_email: str, to_emails:
 
 
 @function_tool
-def send_email(subject: str, html_body: str, from_email: Optional[str] = None, to_email: Optional[str] = None) -> EmailResult:
+def send_email(
+    subject: str,
+    html_body: str,
+    from_email: Optional[str] = None,
+    to_email: Optional[str] = None,
+) -> EmailResult:
     """
     Send an HTML email using SendGrid.
     - subject: subject line (max length enforced)
@@ -159,10 +180,14 @@ def send_email(subject: str, html_body: str, from_email: Optional[str] = None, t
     to_addr = _validate_addresses(to_addr)
 
     if not to_addr:
-        raise ValidationError("recipient email not provided (to_email param or DEFAULT_EMAIL_TO env var required)")
+        raise ValidationError(
+            "recipient email not provided (to_email param or DEFAULT_EMAIL_TO env var required)"
+        )
 
     if not from_addr:
-        raise ValidationError("sender email not provided (from_email param or DEFAULT_EMAIL_FROM env var required)")
+        raise ValidationError(
+            "sender email not provided (from_email param or DEFAULT_EMAIL_FROM env var required)"
+        )
 
     # Basic subject validation
     subject = (subject or "").strip()
@@ -175,34 +200,68 @@ def send_email(subject: str, html_body: str, from_email: Optional[str] = None, t
     if not html_body or not html_body.strip():
         raise ValidationError("html_body must be provided and non-empty")
     if len(html_body.encode("utf-8")) > MAX_BODY_BYTES:
-        raise ValidationError(f"html_body exceeds maximum size of {MAX_BODY_BYTES} bytes")
+        raise ValidationError(
+            f"html_body exceeds maximum size of {MAX_BODY_BYTES} bytes"
+        )
 
     # sanitize
     cleaned_html = _sanitize_html(html_body)
 
     # recipients support comma-separated addresses
-    recipients = [recipient.strip() for recipient in to_addr.split(",") if recipient.strip()]
+    recipients = [
+        recipient.strip() for recipient in to_addr.split(",") if recipient.strip()
+    ]
 
     try:
-        send_result = _send_via_sendgrid(subject=subject, html_body=cleaned_html, from_email=from_addr, to_emails=recipients)
-        return {"status": "ok", "status_code": send_result.get("status_code"), "sg_response_body": send_result.get("body"), "message": None}
+        send_result = _send_via_sendgrid(
+            subject=subject,
+            html_body=cleaned_html,
+            from_email=from_addr,
+            to_emails=recipients,
+        )
+        return {
+            "status": "ok",
+            "status_code": send_result.get("status_code"),
+            "sg_response_body": send_result.get("body"),
+            "message": None,
+        }
     except SendGridError as error:
         logger.exception("send_email:sendgrid_error")
-        return {"status": "error", "status_code": None, "sg_response_body": None, "message": str(error)}
+        return {
+            "status": "error",
+            "status_code": None,
+            "sg_response_body": None,
+            "message": str(error),
+        }
     except ConfigurationError as error:
         logger.exception("send_email:config_error")
-        return {"status": "error", "status_code": None, "sg_response_body": None, "message": str(error)}
+        return {
+            "status": "error",
+            "status_code": None,
+            "sg_response_body": None,
+            "message": str(error),
+        }
     except ValidationError as error:
         logger.exception("send_email:validation_error")
-        return {"status": "error", "status_code": None, "sg_response_body": None, "message": str(error)}
+        return {
+            "status": "error",
+            "status_code": None,
+            "sg_response_body": None,
+            "message": str(error),
+        }
     except Exception as error:
         logger.exception("send_email:unexpected_error")
-        return {"status": "error", "status_code": None, "sg_response_body": None, "message": f"unexpected error: {error}"}
+        return {
+            "status": "error",
+            "status_code": None,
+            "sg_response_body": None,
+            "message": f"unexpected error: {error}",
+        }
 
 
 email_agent = Agent(
     name="Email agent",
     instructions=INSTRUCTIONS,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )

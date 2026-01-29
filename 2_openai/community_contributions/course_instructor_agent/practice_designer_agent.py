@@ -5,10 +5,10 @@ from pydantic import BaseModel, Field
 from agents import Agent
 
 
-class PracticeDesignerInstructions():
+class PracticeDesignerInstructions:
     def name(self):
         return "practice_designer"
-    
+
     def instructions(self):
         return (
             "You are a test designer agent. Based on lesson content and learning objectives, you generate:"
@@ -22,19 +22,22 @@ class PracticeDesignerInstructions():
 
     def handoff_description(self):
         return self.instructions()
-    
-    def model(self) -> Literal["gpt-4o-mini", "gpt-4o"]:
-        return "gpt-4o-mini"
+
+    def model(self) -> Literal["gpt-5-mini", "gpt-4o"]:
+        return "gpt-5-mini"
+
 
 class Question(BaseModel):
     question: str = Field(description="The question to be asked from the student")
     answer: str = Field(description="The answer to the question")
     explanation: str = Field(description="The explanation of the answer")
 
+
 class Practice(BaseModel):
     questions: list[Question]
 
-class PracticeDesignerAgent():
+
+class PracticeDesignerAgent:
     def __init__(self):
         instructions = PracticeDesignerInstructions()
         self.agent = Agent(
@@ -44,8 +47,10 @@ class PracticeDesignerAgent():
             handoff_description=instructions.handoff_description(),
             output_type=Practice,
         )
-        
+
     def as_tool(self):
         instructions = PracticeDesignerInstructions()
-        return self.agent.as_tool(tool_name=instructions.name(), tool_description=instructions.handoff_description())
-    
+        return self.agent.as_tool(
+            tool_name=instructions.name(),
+            tool_description=instructions.handoff_description(),
+        )

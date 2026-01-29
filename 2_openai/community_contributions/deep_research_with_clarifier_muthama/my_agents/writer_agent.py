@@ -25,11 +25,13 @@ FollowUpQuestion = constr(strip_whitespace=True, min_length=5, max_length=200)
 
 
 def _count_words(text: str) -> int:
-    return len(re.findall(r"\S+", text)) # Conservative word count: split on whitespace
+    return len(re.findall(r"\S+", text))  # Conservative word count: split on whitespace
 
 
 def _count_sentences(text: str) -> int:
-    return len([sentence for sentence in re.split(r"[.!?]+", text) if sentence.strip()]) # Simple sentence tokenizer based on ., !, ?
+    return len(
+        [sentence for sentence in re.split(r"[.!?]+", text) if sentence.strip()]
+    )  # Simple sentence tokenizer based on ., !, ?
 
 
 class ReportData(BaseModel):
@@ -40,8 +42,12 @@ class ReportData(BaseModel):
     - follow_up_questions: 1-10 suggested follow-up research topics
     """
 
-    short_summary: ShortLine = Field(..., description="A short 2-3 sentence summary of the findings.")
-    markdown_report: MarkdownText = Field(..., description="The final report in Markdown format.")
+    short_summary: ShortLine = Field(
+        ..., description="A short 2-3 sentence summary of the findings."
+    )
+    markdown_report: MarkdownText = Field(
+        ..., description="The final report in Markdown format."
+    )
     follow_up_questions: List[FollowUpQuestion] = Field(
         ..., description="Suggested topics to research further (1-10 items)."
     )
@@ -54,7 +60,9 @@ class ReportData(BaseModel):
             raise ValueError("short_summary must be 2–3 sentences long.")
         # Ensure it's short and summary-like (not multi-paragraph)
         if "\n" in short_summary:
-            raise ValueError("short_summary must be a single short paragraph (no newlines).")
+            raise ValueError(
+                "short_summary must be a single short paragraph (no newlines)."
+            )
         return short_summary.strip()
 
     @field_validator("markdown_report")
@@ -62,11 +70,15 @@ class ReportData(BaseModel):
     def validate_markdown_and_length(cls, markdown_report: str) -> str:
         # Must look like Markdown: require at least one top-level header or other header
         if not re.search(r"(^|\n)#{1,6}\s+\S", markdown_report):
-            raise ValueError("markdown_report must contain at least one Markdown header (e.g., '# Title').")
+            raise ValueError(
+                "markdown_report must contain at least one Markdown header (e.g., '# Title')."
+            )
 
         word_count = _count_words(markdown_report)
         if word_count < 100:
-            raise ValueError(f"markdown_report must be at least 100 words (got {word_count}).")
+            raise ValueError(
+                f"markdown_report must be at least 100 words (got {word_count})."
+            )
         # Soft upper bound to prevent runaway outputs; adjust if necessary
         if word_count > 20000:
             raise ValueError(f"markdown_report too long (>{20000} words).")
@@ -76,7 +88,9 @@ class ReportData(BaseModel):
     @classmethod
     def validate_followups(cls, follow_up_questions: List[str]) -> List[str]:
         if not isinstance(follow_up_questions, list):
-            raise ValueError("follow_up_questions must be a list of short suggestion strings.")
+            raise ValueError(
+                "follow_up_questions must be a list of short suggestion strings."
+            )
         if len(follow_up_questions) < 1:
             raise ValueError("At least one follow-up question is required.")
         if len(follow_up_questions) > 10:
@@ -85,10 +99,14 @@ class ReportData(BaseModel):
         cleaned = []
         for item in follow_up_questions:
             if "\n" in item:
-                raise ValueError("Each follow_up_question must be a single-line string.")
+                raise ValueError(
+                    "Each follow_up_question must be a single-line string."
+                )
             item = item.strip()
             if len(item) < 5:
-                raise ValueError("Each follow_up_question must be at least 5 characters.")
+                raise ValueError(
+                    "Each follow_up_question must be at least 5 characters."
+                )
             cleaned.append(item)
         return cleaned
 
@@ -117,6 +135,6 @@ def validate_model_output(raw: dict) -> ReportData:
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ReportData,
 )

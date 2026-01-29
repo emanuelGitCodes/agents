@@ -5,7 +5,9 @@ from langgraph.graph.message import add_messages
 from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver  # Changed to AsyncSqliteSaver for async support
+from langgraph.checkpoint.sqlite.aio import (
+    AsyncSqliteSaver,
+)  # Changed to AsyncSqliteSaver for async support
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from typing import List, Any, Optional, Dict
 from pydantic import BaseModel, Field
@@ -28,7 +30,9 @@ class State(TypedDict):
 
 class EvaluatorOutput(BaseModel):
     feedback: str = Field(description="Feedback on the assistant's response")
-    success_criteria_met: bool = Field(description="Whether the success criteria have been met")
+    success_criteria_met: bool = Field(
+        description="Whether the success criteria have been met"
+    )
     user_input_needed: bool = Field(
         description="True if more input is needed from the user, or clarifications, or the assistant is stuck"
     )
@@ -38,9 +42,9 @@ class Sidekick:
     def __init__(self, username: str = None):
         """
         Initialize Sidekick with optional username for SQLite memory persistence.
-        
+
         Args:
-            username: Username to use as thread_id for persistent memory. 
+            username: Username to use as thread_id for persistent memory.
                      If None, generates a random UUID (non-persistent session).
         """
         self.worker_llm_with_tools = None
@@ -50,7 +54,7 @@ class Sidekick:
         self.graph = None
         self.sidekick_id = username if username else str(uuid.uuid4())
         self.db_path = "sidekick_memory.db"
-        self.memory = None  
+        self.memory = None
         self.browser = None
         self.playwright = None
 
@@ -59,10 +63,12 @@ class Sidekick:
         self.memory = AsyncSqliteSaver(self.db_conn)
         self.tools, self.browser, self.playwright = await playwright_tools()
         self.tools += await other_tools()
-        worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
-        evaluator_llm = ChatOpenAI(model="gpt-4o-mini")
-        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(EvaluatorOutput)
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
+        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
+            EvaluatorOutput
+        )
         await self.build_graph()
 
     def worker(self, state: State) -> Dict[str, Any]:
@@ -198,7 +204,9 @@ class Sidekick:
         )
         graph_builder.add_edge("tools", "worker")
         graph_builder.add_conditional_edges(
-            "evaluator", self.route_based_on_evaluation, {"worker": "worker", "END": END}
+            "evaluator",
+            self.route_based_on_evaluation,
+            {"worker": "worker", "END": END},
         )
         graph_builder.add_edge(START, "worker")
 
@@ -208,12 +216,13 @@ class Sidekick:
     async def run_superstep(self, message, success_criteria, history):
         config = {
             "configurable": {"thread_id": self.sidekick_id},
-            "recursion_limit": 10
+            "recursion_limit": 10,
         }
 
         state = {
             "messages": message,
-            "success_criteria": success_criteria or "The answer should be clear and accurate",
+            "success_criteria": success_criteria
+            or "The answer should be clear and accurate",
             "feedback_on_work": None,
             "success_criteria_met": False,
             "user_input_needed": False,
@@ -227,12 +236,12 @@ class Sidekick:
     async def get_history(self):
         """Retrieve conversation history from current state."""
         config = {"configurable": {"thread_id": self.sidekick_id}}
-        
+
         try:
             # Get the current state for this thread
             state = await self.graph.aget_state(config)
             messages = state.values.get("messages", [])
-            
+
             # Convert messages to Gradio chat format
             history_messages = []
             for msg in messages:
@@ -240,34 +249,37 @@ class Sidekick:
                     history_messages.append({"role": "user", "content": msg.content})
                 elif isinstance(msg, AIMessage):
                     if msg.content:  # Only add if there's actual content
-                        history_messages.append({"role": "assistant", "content": msg.content})
-            
+                        history_messages.append(
+                            {"role": "assistant", "content": msg.content}
+                        )
+
             return history_messages
         except Exception as e:
             print(f"Error retrieving history: {e}")
-            return [{"role": "assistant", "content": f"Error loading history: {str(e)}"}]
+            return [
+                {"role": "assistant", "content": f"Error loading history: {str(e)}"}
+            ]
 
     async def clear_history(self):
         """Clear conversation history from database for this thread."""
         try:
             # Delete checkpoints for this thread_id from the database
             async with self.db_conn.execute(
-                "DELETE FROM checkpoints WHERE thread_id = ?", 
-                (self.sidekick_id,)
+                "DELETE FROM checkpoints WHERE thread_id = ?", (self.sidekick_id,)
             ) as cursor:
                 await self.db_conn.commit()
                 rows_deleted = cursor.rowcount
-            
+
             # Also clear from checkpoint_writes table if it exists
             try:
                 async with self.db_conn.execute(
-                    "DELETE FROM checkpoint_writes WHERE thread_id = ?", 
-                    (self.sidekick_id,)
+                    "DELETE FROM checkpoint_writes WHERE thread_id = ?",
+                    (self.sidekick_id,),
                 ):
                     await self.db_conn.commit()
             except:
                 pass  # Table might not exist in all versions
-            
+
             return f"History cleared successfully! ({rows_deleted} checkpoints removed)"
         except Exception as e:
             return f"Error clearing history: {str(e)}"
@@ -283,7 +295,7 @@ class Sidekick:
             if self.playwright:
                 loop.create_task(self.playwright.stop())
             # Close database connection
-            if hasattr(self, 'db_conn') and self.db_conn:
+            if hasattr(self, "db_conn") and self.db_conn:
                 loop.create_task(self.db_conn.close())
         except RuntimeError:
             # If no loop is running, do a direct run
@@ -291,5 +303,5 @@ class Sidekick:
                 asyncio.run(self.browser.close())
             if self.playwright:
                 asyncio.run(self.playwright.stop())
-            if hasattr(self, 'db_conn') and self.db_conn:
+            if hasattr(self, "db_conn") and self.db_conn:
                 asyncio.run(self.db_conn.close())

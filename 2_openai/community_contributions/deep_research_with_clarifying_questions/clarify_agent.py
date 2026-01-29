@@ -8,6 +8,6 @@ INSTRUCTIONS = (
 clarify_agent = Agent(
     name="ClarifyAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=str,
 )

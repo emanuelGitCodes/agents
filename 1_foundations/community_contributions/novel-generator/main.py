@@ -10,14 +10,16 @@ from IPython.display import display, Markdown
 
 load_dotenv(override=True)
 
+
 # Async loading indicator that runs until the event is set
 async def show_loading_indicator(done_event):
-    for dots in itertools.cycle(['', '.', '..', '...']):
+    for dots in itertools.cycle(["", ".", "..", "..."]):
         if done_event.is_set():
             break
-        print(f'\rGenerating{dots}', end='', flush=True)
+        print(f"\rGenerating{dots}", end="", flush=True)
         await asyncio.sleep(0.5)
-    print('\rDone generating!     ')  # Clear the line when done
+    print("\rDone generating!     ")  # Clear the line when done
+
 
 def prompt_with_default(prompt_text, default_value=None, cast_type=str):
     user_input = input(f"{prompt_text} ")
@@ -29,9 +31,12 @@ def prompt_with_default(prompt_text, default_value=None, cast_type=str):
         print(f"Invalid input. Using default: {default_value}")
         return default_value
 
+
 def get_user_inputs():
     # 1. Novel genre
-    genre = prompt_with_default("Novel genre (press Enter for default - teen mystery):", "teen mystery")
+    genre = prompt_with_default(
+        "Novel genre (press Enter for default - teen mystery):", "teen mystery"
+    )
 
     # 2. General plot
     plot = input("\nGeneral plot (Enter for auto-generated plot): ").strip()
@@ -44,11 +49,15 @@ def get_user_inputs():
         title = "Auto-Generated Title"
 
     # 4. Number of pages
-    num_pages = prompt_with_default("\nNumber of pages in novel (Enter for default - 90 pages):", 90, int)
+    num_pages = prompt_with_default(
+        "\nNumber of pages in novel (Enter for default - 90 pages):", 90, int
+    )
     num_words = num_pages * 275
 
     # 5. Number of chapters
-    num_chapters = prompt_with_default("\nNumber of chapters (Enter for default - 15):", 15, int)
+    num_chapters = prompt_with_default(
+        "\nNumber of chapters (Enter for default - 15):", 15, int
+    )
 
     # 6. Max AI tokens
     while True:
@@ -63,8 +72,14 @@ def get_user_inputs():
                 continue
 
             if max_tokens > 300000:
-                print(f"\n⚠️  You entered {max_tokens:,} tokens, which is quite high and may be expensive.")
-                confirm = input("Are you sure you want to use this value? (Yes or No): ").strip().lower()
+                print(
+                    f"\n⚠️  You entered {max_tokens:,} tokens, which is quite high and may be expensive."
+                )
+                confirm = (
+                    input("Are you sure you want to use this value? (Yes or No): ")
+                    .strip()
+                    .lower()
+                )
                 if confirm != "yes":
                     print("Okay, let's try again.\n")
                     continue  # Ask again
@@ -74,7 +89,10 @@ def get_user_inputs():
             print("Please enter a valid integer.")
     return genre, title, num_pages, num_words, num_chapters, plot, max_tokens
 
-async def generate_novel(genre, title, num_pages, num_words, num_chapters, plot, max_tokens):
+
+async def generate_novel(
+    genre, title, num_pages, num_words, num_chapters, plot, max_tokens
+):
     # Print collected inputs for confirmation (optional)
     print("\nCOLLECTED NOVEL CONFIGURATION:\n")
     print(f"Genre: {genre}")
@@ -86,15 +104,15 @@ async def generate_novel(genre, title, num_pages, num_words, num_chapters, plot,
 
     print("\nAwesome, now we'll generate your novel!")
 
-    INSTRUCTIONS = f"You are a fiction author assistant. You will use user-provided parameters, \
+    INSTRUCTIONS = f'You are a fiction author assistant. You will use user-provided parameters, \
     or default parameters, to generate a creative and engaging novel. \
     Do not perform web searches. Focus entirely on imaginative, coherent, and emotionally engaging content. \
     Your output should read like a real novel, vivid, descriptive, and character-driven. \
     \
-    If the user input plot is \"Auto-Generated Plot\" then you should generate an interesting plot for the novel \
+    If the user input plot is "Auto-Generated Plot" then you should generate an interesting plot for the novel \
     based on the genre, otherwise use the plot provided by the user. \
     \
-    If the user input title is \"Auto-Generated Title\" then you should generate an interesting title \
+    If the user input title is "Auto-Generated Title" then you should generate an interesting title \
     based on the genre and plot, otherwise use the title provided by the user. \
     \
     The genre of the novel is {genre}. The plot of the novel is {plot}. The title of the novel is {title}. \
@@ -110,30 +128,28 @@ async def generate_novel(genre, title, num_pages, num_words, num_chapters, plot,
     The story should contain approximately {num_words} words to match a target of {num_pages} standard paperback pages. \
     Each chapter should contribute proportionally to the total word count. \
     Continue generating story content until the target word count is reached or slightly exceeded. \
-    Do not summarize or compress events to shorten the story."
+    Do not summarize or compress events to shorten the story.'
 
     search_agent = Agent(
         name="Novel Generator Agent",
         instructions=INSTRUCTIONS,
-        model="gpt-4o-mini",
+        model="gpt-5-mini",
         model_settings=ModelSettings(
             temperature=0.8,
             top_p=0.9,
             frequency_penalty=0.5,
             presence_penalty=0.6,
-            max_tokens=max_tokens
-        )
+            max_tokens=max_tokens,
+        ),
     )
 
     message = f"Generate a {genre} novel titled '{title}' with {num_pages} pages."
 
     with trace("Search"):
-        result = await Runner.run(
-            search_agent, 
-            message
-        )
+        result = await Runner.run(search_agent, message)
 
     return result.final_output
+
 
 # Your agent call with loading indicator
 async def main():
@@ -141,7 +157,9 @@ async def main():
     loader_task = asyncio.create_task(show_loading_indicator(done_event))
 
     # Run the agent
-    genre, title, num_pages, num_words, num_chapters, plot, max_tokens = get_user_inputs()
+    genre, title, num_pages, num_words, num_chapters, plot, max_tokens = (
+        get_user_inputs()
+    )
 
     result = await generate_novel(
         genre, title, num_pages, num_words, num_chapters, plot, max_tokens
@@ -160,7 +178,13 @@ async def main():
             break
 
     # Sanitize title for filename
-    filename_safe_title = ''.join(c if c.isalnum() or c in (' ', '_', '-') else '_' for c in generated_title).strip().replace(' ', '_')
+    filename_safe_title = (
+        "".join(
+            c if c.isalnum() or c in (" ", "_", "-") else "_" for c in generated_title
+        )
+        .strip()
+        .replace(" ", "_")
+    )
     output_path = os.path.abspath(f"novel_{filename_safe_title}.txt")
 
     # Save to file
@@ -169,6 +193,7 @@ async def main():
 
     # Show full path
     print(f"\n📘 Novel saved to: {output_path}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

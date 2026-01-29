@@ -15,8 +15,9 @@ load_dotenv(override=True)
 
 MAX_TURNS = 20
 
+
 class RiskManager:
-    def __init__(self, trader_names: list[str], model_name="gpt-4o-mini"):
+    def __init__(self, trader_names: list[str], model_name="gpt-5-mini"):
         self.trader_names = trader_names
         self.model_name = model_name
         self.agent = None
@@ -70,7 +71,9 @@ class RiskManager:
             write_log("riskmanager", "trace", "Starting risk assessment")
             result = await self.run_with_trace()
             assessment = result[:500] if result else "Assessment completed"
-            recommendations = result[500:1000] if len(result) > 500 else "See full assessment"
+            recommendations = (
+                result[500:1000] if len(result) > 500 else "See full assessment"
+            )
             write_risk_assessment(assessment, recommendations)
             write_log("riskmanager", "trace", "Risk assessment completed")
             return result

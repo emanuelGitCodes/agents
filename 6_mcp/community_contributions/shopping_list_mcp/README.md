@@ -8,7 +8,7 @@ A simple MCP (Model Context Protocol) server for managing a shopping list with b
 - ✅ Track item prices and calculate totals
 - ✅ Set and monitor shopping budget
 - ✅ Budget warnings (🟢 On track / 🟡 Warning / 🔴 Over budget)
-- ✅ Conversational assistant powered by GPT-4.1-mini
+- ✅ Conversational assistant powered by gpt-5-mini
 - ✅ No external APIs or databases - runs entirely in memory
 - ✅ **📧 Email shopping list to spouse (via Resend)**
 - ✅ **📱 Text shopping list to mobile (via email gateway)**
@@ -115,7 +115,7 @@ uv run simple_client.py
 
 🧑 You: The milk was $4.99 and eggs were $5.99
 
-🤖 Assistant: Updated! Your total is now $10.98. 
+🤖 Assistant: Updated! Your total is now $10.98.
 You have $39.02 remaining. 🟢 You're on track!
 
 🧑 You: What's on my list?
@@ -135,7 +135,7 @@ You have $39.02 remaining. 🟢 You're on track!
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│      User       │     │   GPT-4.1-mini  │     │   MCP Server    │
+│      User       │     │   gpt-5-mini  │     │   MCP Server    │
 │                 │     │                 │     │                 │
 │ "Add milk"      │ ──▶ │ Understands     │ ──▶ │ add_item()      │
 │                 │     │ intent, calls   │     │ executes        │
@@ -160,4 +160,3 @@ Gandhali Keskar
 ## License
 
 MIT
-

@@ -13,7 +13,7 @@ requirements_analyst:
     Your superpower lies in asking the right clarifying questions and identifying hidden
     requirements that humans often miss. Your job is to ensure that the database design
     starts on the right foundation.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 schema_builder:
   role: >
@@ -30,7 +30,7 @@ schema_builder:
     design is not just functional today but can adapt to future business growth. You
     take pride in producing ERDs and SQL scripts that are both technically sound and
     easy to understand.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 reviewer_critic:
   role: >
@@ -48,4 +48,4 @@ reviewer_critic:
     indexing strategies, and scalability planning. You are not afraid to challenge design
     choices and propose better alternatives. Your mission is to ensure the final schema
     is rock-solid, performant, and future-ready.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini

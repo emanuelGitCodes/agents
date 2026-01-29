@@ -1,6 +1,14 @@
 from pydantic import BaseModel, Field
-from agents import Agent, output_guardrail, GuardrailFunctionOutput,OutputGuardrailTripwireTriggered, RunContextWrapper,Runner
-#from guardrail_agent import guardrail_agent, guardrail_output_length
+from agents import (
+    Agent,
+    output_guardrail,
+    GuardrailFunctionOutput,
+    OutputGuardrailTripwireTriggered,
+    RunContextWrapper,
+    Runner,
+)
+
+# from guardrail_agent import guardrail_agent, guardrail_output_length
 
 INSTRUCTIONS = (
     "You are a senior researcher tasked with writing a cohesive report for a research query. "
@@ -16,37 +24,51 @@ class ReportData(BaseModel):
 
     guard_rail_output: str = Field(description="guardrail output")
     guard_rail_tripped: bool = Field(description="guard_rail tripped")
-    short_summary: str = Field(description="A short 2-3 sentence summary of the findings.")
+    short_summary: str = Field(
+        description="A short 2-3 sentence summary of the findings."
+    )
 
     markdown_report: str = Field(description="The final report")
 
-    follow_up_questions: list[str] = Field(description="Suggested topics to research further")
+    follow_up_questions: list[str] = Field(
+        description="Suggested topics to research further"
+    )
+
 
 class CheckOutputLength(BaseModel):
     is_report_too_long: bool
     reason: str
 
-guardrail_agent = Agent( 
+
+guardrail_agent = Agent(
     name="Check maximum length",
     instructions="Check if output longer than 999 words",
     output_type=CheckOutputLength,
-    model="gpt-4o-mini"
+    model="gpt-5-mini",
 )
 
+
 @output_guardrail
-async def guardrail_output_length(ctx: RunContextWrapper, agent: Agent, output: ReportData) -> GuardrailFunctionOutput:
-    result = await Runner.run(guardrail_agent, output.markdown_report, context=ctx.context)
+async def guardrail_output_length(
+    ctx: RunContextWrapper, agent: Agent, output: ReportData
+) -> GuardrailFunctionOutput:
+    result = await Runner.run(
+        guardrail_agent, output.markdown_report, context=ctx.context
+    )
     print(result.final_output.reason)
     print(result.final_output.is_report_too_long)
-    output.guard_rail_output=result.final_output.reason
-    output.guard_rail_tripped=result.final_output.is_report_too_long
-    return GuardrailFunctionOutput(output_info={"output_too_long": result.final_output.reason},tripwire_triggered=False)
+    output.guard_rail_output = result.final_output.reason
+    output.guard_rail_tripped = result.final_output.is_report_too_long
+    return GuardrailFunctionOutput(
+        output_info={"output_too_long": result.final_output.reason},
+        tripwire_triggered=False,
+    )
 
 
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ReportData,
-    output_guardrails=[guardrail_output_length]
+    output_guardrails=[guardrail_output_length],
 )

@@ -45,15 +45,15 @@ The report should feel like it was written specifically for this user's needs, n
 
 class ReportData(BaseModel):
     """Research report with metadata"""
-    
+
     short_summary: str = Field(
         description="A compelling 2-3 sentence executive summary highlighting the most important findings relevant to the user's interests"
     )
-    
+
     markdown_report: str = Field(
         description="The complete research report in markdown format, tuned to the user's clarified interests. Should be comprehensive, well-structured, and professionally written. Minimum 1000 words."
     )
-    
+
     follow_up_questions: list[str] = Field(
         description="5-7 thoughtful follow-up questions or topics that would be valuable to research further, based on the findings and the user's interests"
     )
@@ -62,7 +62,6 @@ class ReportData(BaseModel):
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ReportData,
 )
-

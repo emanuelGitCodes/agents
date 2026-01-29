@@ -34,23 +34,23 @@ If results are sufficient:
 
 class SearchEvaluation(BaseModel):
     """Evaluation of search results quality"""
-    
+
     is_satisfactory: bool = Field(
         description="True if search results are sufficient to answer the query comprehensively, False if more searches are needed"
     )
-    
+
     quality_score: int = Field(
         description="Quality rating from 1-10, where 10 is excellent comprehensive coverage and 1 is poor/irrelevant"
     )
-    
+
     gaps_identified: list[str] = Field(
         description="List of specific information gaps or missing aspects (empty if results are satisfactory)"
     )
-    
+
     reasoning: str = Field(
         description="Detailed explanation of why results are satisfactory or what's missing"
     )
-    
+
     suggestions: list[str] = Field(
         description="If not satisfactory, list of specific additional searches to fill the gaps (empty if satisfactory)"
     )
@@ -59,7 +59,6 @@ class SearchEvaluation(BaseModel):
 evaluator_agent = Agent(
     name="EvaluatorAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=SearchEvaluation,
 )
-

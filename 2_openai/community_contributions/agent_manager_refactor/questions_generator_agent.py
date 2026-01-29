@@ -6,5 +6,5 @@ INSTRUCTIONS = f"You are a helpful research assistant. Given a query, come up wi
 questions_generator_agent = Agent(
     name="QuestionsGeneratorAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )

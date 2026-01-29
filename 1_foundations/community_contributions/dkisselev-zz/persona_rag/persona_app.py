@@ -23,9 +23,10 @@ pushover_token = os.getenv("PUSHOVER_TOKEN")
 pushover_url = "https://api.pushover.net/1/messages.json"
 
 # Model configuration
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-5-mini"
 
 PERSONA_NAME = "Dmitry Kisselev"
+
 
 def push(message):
     """Send Pushover notification"""
@@ -35,11 +36,12 @@ def push(message):
             payload = {
                 "user": pushover_user,
                 "token": pushover_token,
-                "message": message
+                "message": message,
             }
             requests.post(pushover_url, data=payload)
         except Exception as e:
             print(f"Pushover error: {e}")
+
 
 # Tool functions
 def record_user_details(email, name="Name not provided", notes="not provided"):
@@ -47,10 +49,12 @@ def record_user_details(email, name="Name not provided", notes="not provided"):
     push(f"Recording interest from {name} with email {email} and notes {notes}")
     return {"recorded": "ok"}
 
+
 def record_unknown_question(question):
     """Record questions that couldn't be answered"""
     push(f"Recording question I couldn't answer: {question}")
     return {"recorded": "ok"}
+
 
 # Tool definitions for OpenAI
 record_user_details_json = {
@@ -61,20 +65,20 @@ record_user_details_json = {
         "properties": {
             "email": {
                 "type": "string",
-                "description": "The email address of this user"
+                "description": "The email address of this user",
             },
             "name": {
                 "type": "string",
-                "description": "The user's name, if they provided it"
+                "description": "The user's name, if they provided it",
             },
             "notes": {
                 "type": "string",
-                "description": "Any additional information about the conversation that's worth recording to give context"
-            }
+                "description": "Any additional information about the conversation that's worth recording to give context",
+            },
         },
         "required": ["email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 record_unknown_question_json = {
@@ -85,18 +89,19 @@ record_unknown_question_json = {
         "properties": {
             "question": {
                 "type": "string",
-                "description": "The question that couldn't be answered"
+                "description": "The question that couldn't be answered",
             }
         },
         "required": ["question"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 tools = [
     {"type": "function", "function": record_user_details_json},
-    {"type": "function", "function": record_unknown_question_json}
+    {"type": "function", "function": record_unknown_question_json},
 ]
+
 
 def handle_tool_calls(tool_calls):
     """Execute tool calls and return results"""
@@ -105,17 +110,20 @@ def handle_tool_calls(tool_calls):
         tool_name = tool_call.function.name
         arguments = json.loads(tool_call.function.arguments)
         print(f"Tool called: {tool_name}", flush=True)
-        
+
         # Execute the tool
         tool = globals().get(tool_name)
         result = tool(**arguments) if tool else {}
-        
-        results.append({
-            "role": "tool",
-            "content": json.dumps(result),
-            "tool_call_id": tool_call.id
-        })
+
+        results.append(
+            {
+                "role": "tool",
+                "content": json.dumps(result),
+                "tool_call_id": tool_call.id,
+            }
+        )
     return results
+
 
 # System prompt
 SYSTEM_PROMPT = """You are {PERSONA_NAME}, answering questions about yourself on your personal website.
@@ -123,7 +131,7 @@ SYSTEM_PROMPT = """You are {PERSONA_NAME}, answering questions about yourself on
 Speak naturally in first person as if you're talking about your own life, career, and experiences.
 Be professional but friendly and conversational.
 
-If someone is engaging in discussion, try to steer them towards getting in touch via email. 
+If someone is engaging in discussion, try to steer them towards getting in touch via email.
 Ask for their email and record it using your record_user_details tool.
 
 If you truly don't know something or cannot answer a question based on the provided context,
@@ -139,7 +147,7 @@ Speak naturally in first person as if you're talking about your own life, career
 Be professional but friendly and conversational.
 
 The user has already shared their contact information with you. Continue the conversation naturally.
-If appropriate, you can mention that you're looking forward to connecting via email, but don't ask 
+If appropriate, you can mention that you're looking forward to connecting via email, but don't ask
 for their email again.
 
 If you truly don't know something or cannot answer a question based on the provided context,
@@ -148,22 +156,25 @@ use your record_unknown_question tool to record what you couldn't answer.
 Relevant context about me:
 {context}"""
 
+
 def chat(message, history):
-    """ Handle chat interaction with RAG and tool support """
+    """Handle chat interaction with RAG and tool support"""
     # Get RAG answer and context
     try:
         rag_answer, docs = answer_question(message, history)
-        
+
         # Format context from retrieved documents for tool-enhanced response
-        context = "\n\n".join([
-            f"[{doc.metadata.get('source', 'unknown')} - {doc.metadata.get('data_type', 'unknown')}]\n{doc.page_content[:300]}..."
-            for doc in docs[:5]
-        ])
+        context = "\n\n".join(
+            [
+                f"[{doc.metadata.get('source', 'unknown')} - {doc.metadata.get('data_type', 'unknown')}]\n{doc.page_content[:300]}..."
+                for doc in docs[:5]
+            ]
+        )
     except Exception as e:
         print(f"RAG error: {e}")
         rag_answer = None
         context = "Unable to retrieve context."
-    
+
     # Check if email has already been collected in this conversation
     email_collected = False
     for h in history:
@@ -171,26 +182,33 @@ def chat(message, history):
             # Check if this message contains a tool call to record_user_details
             if h.get("role") == "assistant" and h.get("tool_calls"):
                 for tc in h.get("tool_calls", []):
-                    if isinstance(tc, dict) and tc.get("function", {}).get("name") == "record_user_details":
+                    if (
+                        isinstance(tc, dict)
+                        and tc.get("function", {}).get("name") == "record_user_details"
+                    ):
                         email_collected = True
                         break
             if email_collected:
                 break
-    
+
     # Choose system prompt based on whether email was collected
     if email_collected:
-        system_content = SYSTEM_PROMPT_POST_CONTACT.format(context=context, PERSONA_NAME=PERSONA_NAME)
+        system_content = SYSTEM_PROMPT_POST_CONTACT.format(
+            context=context, PERSONA_NAME=PERSONA_NAME
+        )
         print("Using post-contact system prompt", flush=True)
     else:
-        system_content = SYSTEM_PROMPT.format(context=context, PERSONA_NAME=PERSONA_NAME)
+        system_content = SYSTEM_PROMPT.format(
+            context=context, PERSONA_NAME=PERSONA_NAME
+        )
         print("Using initial system prompt", flush=True)
-    
+
     # If we have a RAG answer, include it as an "assistant draft" in the system prompt
     if rag_answer:
         system_content += f"\n\nDraft answer based on context: {rag_answer}"
-    
+
     messages = [{"role": "system", "content": system_content}]
-    
+
     # Add history (convert Gradio format to OpenAI format if needed)
     for h in history:
         if isinstance(h, dict):
@@ -198,52 +216,53 @@ def chat(message, history):
         else:
             # Gradio format: list of [user, assistant] pairs
             messages.append({"role": h["role"], "content": h["content"]})
-    
+
     # Add current message
     messages.append({"role": "user", "content": message})
-    
+
     # Tool-calling loop
     done = False
     while not done:
         try:
             response = openai_client.chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                tools=tools
+                model=MODEL, messages=messages, tools=tools
             )
-            
+
             finish_reason = response.choices[0].finish_reason
-            
+
             if finish_reason == "tool_calls":
                 # Handle tool calls
                 msg = response.choices[0].message
                 tool_calls = msg.tool_calls
                 results = handle_tool_calls(tool_calls)
-                
+
                 # Add to messages
-                messages.append({
-                    "role": "assistant",
-                    "content": msg.content,
-                    "tool_calls": [
-                        {
-                            "id": tc.id,
-                            "type": "function",
-                            "function": {
-                                "name": tc.function.name,
-                                "arguments": tc.function.arguments
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": msg.content,
+                        "tool_calls": [
+                            {
+                                "id": tc.id,
+                                "type": "function",
+                                "function": {
+                                    "name": tc.function.name,
+                                    "arguments": tc.function.arguments,
+                                },
                             }
-                        }
-                        for tc in tool_calls
-                    ]
-                })
+                            for tc in tool_calls
+                        ],
+                    }
+                )
                 messages.extend(results)
             else:
                 done = True
         except Exception as e:
             print(f"LLM error: {e}")
             return f"Sorry, I encountered an error: {str(e)}"
-    
+
     return response.choices[0].message.content
+
 
 # Create Gradio interface
 demo = gr.ChatInterface(
@@ -256,16 +275,16 @@ demo = gr.ChatInterface(
         "Tell me about your experience with machine learning",
         "Where do you live?",
         "What did you do at DataRobot?",
-        "What are you working on at The Tensor Lab?"
+        "What are you working on at The Tensor Lab?",
     ],
-    theme=gr.themes.Soft()
+    theme=gr.themes.Soft(),
 )
 
 if __name__ == "__main__":
     print("\nStarting Gradio interface...")
-    print("\nPushover notifications:", "Enabled" if (pushover_user and pushover_token) else "Disabled")
-    
+    print(
+        "\nPushover notifications:",
+        "Enabled" if (pushover_user and pushover_token) else "Disabled",
+    )
+
     demo.launch()
-
-
-

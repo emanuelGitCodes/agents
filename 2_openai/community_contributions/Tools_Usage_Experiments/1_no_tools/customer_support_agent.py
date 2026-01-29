@@ -1,12 +1,13 @@
-""" 
-    Because the agent has not been provided with any tools, 
-    the result of this program will be:
+"""
+Because the agent has not been provided with any tools,
+the result of this program will be:
 
-    'I do not have access to information to answer your question'
+'I do not have access to information to answer your question'
 """
 
 import asyncio
 from agents import Agent, Runner
+
 
 class CustomerSupportAgent:
     def __init__(self):
@@ -18,7 +19,7 @@ class CustomerSupportAgent:
                 "If you cannot get the requested information from a tool, you should respond with: "
                 "'I do not have access to information to answer your question'"
             ),
-            model="gpt-4o-mini"
+            model="gpt-5-mini",
         )
 
     async def run_task(self, message: str):

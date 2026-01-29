@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 # === CONFIGURATION CONSTANTS ===
-PUBLIC_KEY: str = os.getenv('EJS_PUBLIC_KEY')  # Your EmailJS Public Key (user_id)
-SERVICE_ID: str = os.getenv('EJS_SERVICE_ID')  # Your EmailJS Service ID
-TEMPLATE_ID: str = os.getenv('EJS_TEMPLATE_ID')  # Your EmailJS Template ID
+PUBLIC_KEY: str = os.getenv("EJS_PUBLIC_KEY")  # Your EmailJS Public Key (user_id)
+SERVICE_ID: str = os.getenv("EJS_SERVICE_ID")  # Your EmailJS Service ID
+TEMPLATE_ID: str = os.getenv("EJS_TEMPLATE_ID")  # Your EmailJS Template ID
 EMAIL_API_URL: str = "https://api.emailjs.com/api/v1.0/email/send"
-SELF_COPY_EMAIL: str = os.getenv('EJS_SELF_EMAIL')  # Optional: for self-copies
+SELF_COPY_EMAIL: str = os.getenv("EJS_SELF_EMAIL")  # Optional: for self-copies
 
 
 def build_email_payload(email: str, subject: str, html_body: str) -> Dict:
@@ -19,11 +19,7 @@ def build_email_payload(email: str, subject: str, html_body: str) -> Dict:
         "service_id": SERVICE_ID,
         "template_id": TEMPLATE_ID,
         "user_id": PUBLIC_KEY,
-        "template_params": {
-            "email": email,
-            "subject": subject,
-            "content": html_body
-        }
+        "template_params": {"email": email, "subject": subject, "content": html_body},
     }
 
 
@@ -43,10 +39,12 @@ def send_email(subject: str, html_body: str, email: str) -> Dict[str, str]:
         dev_payload = build_email_payload(SELF_COPY_EMAIL, subject, html_body)
         try:
             response = requests.post(url=EMAIL_API_URL, json=dev_payload)
-            print(f"EmailJS self-copy response: {response.status_code} - {response.text}")
+            print(
+                f"EmailJS self-copy response: {response.status_code} - {response.text}"
+            )
         except Exception as e:
             print(f"Error sending self-copy: {e}")
-    
+
     return {"status": "ok"}
 
 
@@ -61,6 +59,5 @@ email_agent = Agent(
     name="Email agent",
     instructions=INSTRUCTIONS,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
-

@@ -5,50 +5,47 @@ import os
 
 class LogAnalyzerConfig(BaseModel):
     logs_directory: str = Field(
-        default="logs",
-        description="Directory containing log files to analyze"
+        default="logs", description="Directory containing log files to analyze"
     )
 
     source_code_directory: str = Field(
         default="source_code",
-        description="Directory containing application source code for investigation"
+        description="Directory containing application source code for investigation",
     )
 
     error_patterns: List[str] = Field(
         default=["ERROR", "FATAL", "Exception", "Traceback"],
-        description="String patterns to identify error entries in logs"
+        description="String patterns to identify error entries in logs",
     )
 
     severity_levels: Dict[str, int] = Field(
         default={"FATAL": 1, "ERROR": 2, "WARN": 3, "INFO": 4},
-        description="Priority ranking for log levels (lower number = higher priority)"
+        description="Priority ranking for log levels (lower number = higher priority)",
     )
 
     max_errors_to_analyze: int = Field(
         default=5,
         description="Maximum number of errors to analyze in one session",
         ge=1,
-        le=20
+        le=20,
     )
 
     enable_notifications: bool = Field(
-        default=True,
-        description="Send push notifications for critical errors"
+        default=True, description="Send push notifications for critical errors"
     )
 
     enable_source_investigation: bool = Field(
         default=True,
-        description="Search and analyze source code when errors reference files"
+        description="Search and analyze source code when errors reference files",
     )
 
     enable_browser_tools: bool = Field(
         default=False,
-        description="Enable Playwright browser tools for web navigation (requires 'playwright install chromium')"
+        description="Enable Playwright browser tools for web navigation (requires 'playwright install chromium')",
     )
 
     llm_model: str = Field(
-        default="gpt-4o-mini",
-        description="OpenAI model to use for worker and evaluator"
+        default="gpt-5-mini", description="OpenAI model to use for worker and evaluator"
     )
 
     def get_absolute_logs_path(self) -> str:
@@ -67,11 +64,11 @@ class LogAnalyzerConfig(BaseModel):
 
         return {
             "logs_directory_exists": logs_exists,
-            "source_code_directory_exists": source_exists
+            "source_code_directory_exists": source_exists,
         }
 
     def get_error_pattern_regex(self) -> str:
-        return '|'.join(self.error_patterns)
+        return "|".join(self.error_patterns)
 
     class Config:
         json_schema_extra = {
@@ -83,6 +80,6 @@ class LogAnalyzerConfig(BaseModel):
                 "max_errors_to_analyze": 5,
                 "enable_notifications": True,
                 "enable_source_investigation": True,
-                "llm_model": "gpt-4o-mini"
+                "llm_model": "gpt-5-mini",
             }
         }

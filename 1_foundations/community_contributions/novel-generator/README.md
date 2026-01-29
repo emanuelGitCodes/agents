@@ -18,7 +18,7 @@ Here is a general formula for calculating tokens per page:
 
 T ≈ pages * 1600 tokens
 
-Example for a 99 page novel, everything to GPT-4o-mini:
+Example for a 99 page novel, everything to gpt-5-mini:
 - Total tokens (1600 per page, 99 pages): ~158,400
 - Cost (input/output combined):
   - Assume 50% input @ $0.0005 = 79.2K × $0.0005 = $0.04
@@ -45,5 +45,5 @@ When prompted, enter specifications for the novel to be generated, such as:
 - the general plot of the novel
 - maximum tokens to use in creating the novel, after which an error message will be displayed
 
-Note that you can just press Enter to accept the defaults, 
+Note that you can just press Enter to accept the defaults,
 and auto-generated title, novel plot.

@@ -29,23 +29,23 @@ Generate questions that will make the research more valuable and targeted.
 
 class ClarifyingQuestions(BaseModel):
     """Email request and three clarifying questions to refine the research"""
-    
+
     email_request: str = Field(
         description="A polite request asking the user to provide their email address for report delivery"
     )
-    
+
     question_1: str = Field(
         description="First clarifying question to better understand the user's research needs"
     )
-    
+
     question_2: str = Field(
         description="Second clarifying question to identify specific interests or constraints"
     )
-    
+
     question_3: str = Field(
         description="Third clarifying question to understand desired depth or focus area"
     )
-    
+
     reasoning: str = Field(
         description="Brief explanation of why these questions will help improve the research"
     )
@@ -54,7 +54,6 @@ class ClarifyingQuestions(BaseModel):
 clarification_agent = Agent(
     name="ClarificationAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ClarifyingQuestions,
 )
-

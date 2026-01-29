@@ -10,13 +10,19 @@ INSTRUCTIONS = (
     "Your questions should be clear, specific, and help guide the research process."
 )
 
+
 class ClarificationQuestions(BaseModel):
-    questions: list[str] = Field(description="A list of 3 clarifying questions to better understand the research query")
-    reasoning: str = Field(description="Brief explanation of why these questions will help improve the research")
+    questions: list[str] = Field(
+        description="A list of 3 clarifying questions to better understand the research query"
+    )
+    reasoning: str = Field(
+        description="Brief explanation of why these questions will help improve the research"
+    )
+
 
 clarify_agent = Agent(
     name="ClarifyAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ClarificationQuestions,
-) 
+)

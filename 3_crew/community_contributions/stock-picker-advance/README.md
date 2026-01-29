@@ -90,8 +90,8 @@ uv export --format=requirements-txt > requirements.txt
 ### LLM models
 
 - Default LLM is set in `crew.py`. Example:
-  - `default_llm = LLM(model="gpt-4o-mini")` (main reasoning)
-  - `function_llm = LLM(model="gpt-4o-mini")` (tool/function calls)
+  - `default_llm = LLM(model="gpt-5-mini")` (main reasoning)
+  - `function_llm = LLM(model="gpt-5-mini")` (tool/function calls)
 - You can upgrade select agents (e.g., manager, shortlist writer) to `gpt-4o` for richer synthesis
 
 ## Outputs

@@ -7,8 +7,9 @@ from typing import List
 import json
 from agents.mcp import MCPServerStdio
 
+
 class NewsSentinel:
-    def __init__(self, trader_names: List[str], model_name="gpt-4o-mini"):
+    def __init__(self, trader_names: List[str], model_name="gpt-5-mini"):
         self.trader_names = trader_names
         self.model_name = model_name
         self.agent = None
@@ -100,6 +101,7 @@ Provide a summary of your findings and the alerts you recorded.
     async def run_with_mcp_servers(self):
         async with AsyncExitStack() as stack:
             from src.utils.mcp_params import trader_mcp_server_params
+
             mcp_servers = [
                 await stack.enter_async_context(
                     MCPServerStdio(params, client_session_timeout_seconds=120)

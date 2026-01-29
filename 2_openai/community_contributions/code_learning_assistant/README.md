@@ -212,7 +212,7 @@ OPENAI_BASE_URL=https://your-gateway.com/v1
 language_teacher = Agent(
     name="Language Teacher",
     instructions=language_teacher_instructions,
-    model="gpt-4o"  # Change to gpt-4o-mini for faster/cheaper
+    model="gpt-4o"  # Change to gpt-5-mini for faster/cheaper
 )
 ```
 

@@ -5,7 +5,7 @@ A professional chatbot that represents you on your website. It answers questions
 ## What It Does
 
 - Loads your professional info from a PDF resume/LinkedIn profile and text summary
-- Responds to visitor questions about you using Azure OpenAI's GPT-4o-mini
+- Responds to visitor questions about you using Azure OpenAI's gpt-5-mini
 - Captures interested visitor emails and logs unanswered questions
 - Sends notifications via Pushover when users engage
 
@@ -31,7 +31,7 @@ Then edit `.env` with your actual values:
 ```
 AZURE_OPENAI_API_KEY=your_key
 AZURE_OPENAI_ENDPOINT=your_endpoint
-AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
+AZURE_OPENAI_DEPLOYMENT=gpt-5-mini
 PUSHOVER_USER=your_pushover_user
 PUSHOVER_TOKEN=your_pushover_token
 ```

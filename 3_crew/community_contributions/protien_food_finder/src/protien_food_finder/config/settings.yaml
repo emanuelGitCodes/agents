@@ -97,7 +97,7 @@ report:
 
 # LLM configuration defaults
 llm:
-  default_model: "gpt-4o-mini"
+  default_model: "gpt-5-mini"
   temperature: 0.7
   max_tokens: 4000
 

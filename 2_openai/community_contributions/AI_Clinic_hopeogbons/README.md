@@ -132,32 +132,32 @@ AI_Clinic/
 
 ### Natural Conversation Flow:
 
-**Patient:** "Hi"  
+**Patient:** "Hi"
 **Triage Nurse:** "Hello! Welcome! How are you feeling today?"
 
-**Patient:** "I've been having severe headaches"  
+**Patient:** "I've been having severe headaches"
 **Triage Nurse:** "I'm sorry to hear that. I'd like to connect you with our Resident Physician for a thorough evaluation. Would that be okay?"
 
-**Patient:** "Yes, please"  
+**Patient:** "Yes, please"
 **Triage Nurse:** "Great! Please hold on while I connect you..."
 
-**Resident Physician:** "Hello! I'm Dr. Crawford. I see you're experiencing headaches. Can you tell me how long you've been having them?"  
+**Resident Physician:** "Hello! I'm Dr. Crawford. I see you're experiencing headaches. Can you tell me how long you've been having them?"
 _[Uses web search to research]_
 
-**Patient:** "About 3 days now"  
+**Patient:** "About 3 days now"
 **Resident Physician:** "Thank you for sharing. On a scale of 1-10, how severe is the pain?"
 
-**Patient:** "Around 7 or 8"  
+**Patient:** "Around 7 or 8"
 **Resident Physician:** "I have a good understanding now. I'd like to consult with our Chief Physician and specialist team. Would you be comfortable with that?"
 
-**Patient:** "Yes"  
+**Patient:** "Yes"
 **Resident Physician:** "Excellent! I'll bring in our Chief Physician..."
 
 **Chief Physician:** "Hello! I'm Dr. Hawking. I'd like to consult with three specialists to give you the most comprehensive assessment. Would that be okay?"
 
-**Patient:** "Sure"  
-**Chief Physician:** "Excellent! Give me a moment..."  
-_[Consults Emergency, Medicine, and Surgery Specialists]_  
+**Patient:** "Sure"
+**Chief Physician:** "Excellent! Give me a moment..."
+_[Consults Emergency, Medicine, and Surgery Specialists]_
 **Chief Physician:** "Your results are ready! Let me know when you'd like to see them."
 
 **Patient:** "I'm ready"
@@ -211,7 +211,7 @@ Edit the `INSTRUCTIONS` variable in each agent file to change behavior.
 
 Update the `model` parameter in agent initialization:
 
-- `gpt-4o-mini` - Faster, cheaper (current default for most agents)
+- `gpt-5-mini` - Faster, cheaper (current default for most agents)
 - `gpt-4o` - More capable (used for Chief Physician)
 
 ### Add More Specialists
@@ -223,11 +223,11 @@ Update the `model` parameter in agent initialization:
 
 ## 📊 Agent Models Used
 
-- **Triage Nurse (Sarah Conner)**: `gpt-4o-mini` - Conversational agent
-- **Resident Physician (Dr. Joan Crawford)**: `gpt-4o-mini` (with WebSearchTool) - Conversational agent
-- **Emergency Specialist (Dr. Stephie Curran)**: `gpt-4o-mini` (with WebSearchTool) - Structured output
-- **Medicine Specialist (Dr. Kinsley Johnson)**: `gpt-4o-mini` (with WebSearchTool) - Structured output
-- **Surgery Specialist (Dr. Rebeccah Meyers)**: `gpt-4o-mini` (with WebSearchTool) - Structured output
+- **Triage Nurse (Sarah Conner)**: `gpt-5-mini` - Conversational agent
+- **Resident Physician (Dr. Joan Crawford)**: `gpt-5-mini` (with WebSearchTool) - Conversational agent
+- **Emergency Specialist (Dr. Stephie Curran)**: `gpt-5-mini` (with WebSearchTool) - Structured output
+- **Medicine Specialist (Dr. Kinsley Johnson)**: `gpt-5-mini` (with WebSearchTool) - Structured output
+- **Surgery Specialist (Dr. Rebeccah Meyers)**: `gpt-5-mini` (with WebSearchTool) - Structured output
 - **Chief Physician (Dr. Stephen Hawking)**: `gpt-4o` (orchestrator) - Dynamic conversational and structured output
 
 ## 🎨 Design Principles
@@ -296,4 +296,3 @@ Created as part of the Andela AI Agents training program.
 ---
 
 **Built with ❤️ using OpenAI Agents SDK and Gradio**
-

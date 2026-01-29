@@ -1,4 +1,4 @@
-from agents import Agent, Runner, trace, WebSearchTool , ModelSettings
+from agents import Agent, Runner, trace, WebSearchTool, ModelSettings
 from IPython.display import display, Markdown
 
 
@@ -9,11 +9,9 @@ grammar. This will be consumed by someone synthesizing a report, so it's vital y
 essence and ignore any fluff. Do not include any additional commentary other than the summary itself"
 
 search_agent = Agent(
-    name = "search agent",
+    name="search agent",
     instructions=INSTRUCTIONS,
-    model='gpt-4o-mini',
-    tools = [WebSearchTool(search_context_size="low")],
-    model_settings=ModelSettings(tool_choice="required")
-
+    model="gpt-5-mini",
+    tools=[WebSearchTool(search_context_size="low")],
+    model_settings=ModelSettings(tool_choice="required"),
 )
-

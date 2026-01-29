@@ -7,8 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-openai_api_key = os.getenv('OPENAI_API_KEY')
-
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 INSTRUCTIONS = """You are a researcher tasked with writing a cohesive report for a research query.
@@ -19,17 +18,25 @@ The final output should be in a markdown format, and it should be lengthy and de
 Aim for 5-10 pages of content, at least 1000 words.
 Come up with 3-5 suggestions of topics that might also be interesting for the user ."""
 
+
 class ReportData(BaseModel):
-    short_summary: str = Field(description = 'A short 2-3 sentences summary of the findings')
-    markdown_report: str = Field(description = 'The final report')
-    follow_up_questions: list[str] = Field(description = 'Suggested topics to explore further')
+    short_summary: str = Field(
+        description="A short 2-3 sentences summary of the findings"
+    )
+    markdown_report: str = Field(description="The final report")
+    follow_up_questions: list[str] = Field(
+        description="Suggested topics to explore further"
+    )
 
 
 report_agent = Agent(
-    name = 'ReportAgent',
-    instructions = INSTRUCTIONS,
-    model = 'gpt-4o-mini',
-    output_type = ReportData
+    name="ReportAgent",
+    instructions=INSTRUCTIONS,
+    model="gpt-5-mini",
+    output_type=ReportData,
 )
 
-report_tool = report_agent.as_tool(tool_name = 'final_report', tool_description = 'Write longe, well-structured final report')
+report_tool = report_agent.as_tool(
+    tool_name="final_report",
+    tool_description="Write longe, well-structured final report",
+)

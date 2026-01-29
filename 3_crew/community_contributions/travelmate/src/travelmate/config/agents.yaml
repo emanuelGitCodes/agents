@@ -18,9 +18,9 @@ travel_guide_agent:
     You are a seasoned travel guide with extensive knowledge of {location}.
     You specialize in identifying the most popular and must-visit tourist destinations,
     providing detailed insights about attractions, cultural significance, and visitor
-    experiences. Your expertise helps travelers discover the best places to visit 
+    experiences. Your expertise helps travelers discover the best places to visit
     and response should be short and concise.
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 food_guide_agent:
   role: >
@@ -35,7 +35,7 @@ food_guide_agent:
     and response should be short and concise.
   context:
     - travel_guide_agent
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 stay_guide_agent:
   role: >
@@ -51,7 +51,7 @@ stay_guide_agent:
   context:
     - travel_guide_agent
     - food_guide_agent
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 # =============================================================================
 # PLANNER AGENTS - Plan Creators
@@ -73,7 +73,7 @@ travel_planner_agent:
     - travel_guide_agent
     - stay_guide_agent
     - food_guide_agent
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 activity_planner_agent:
   role: >
@@ -90,7 +90,7 @@ activity_planner_agent:
     - travel_guide_agent
     - stay_guide_agent
     - food_guide_agent
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 food_planner_agent:
   role: >
@@ -107,7 +107,7 @@ food_planner_agent:
     - travel_guide_agent
     - stay_guide_agent
     - food_guide_agent
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini
 
 budget_planner_agent:
   role: >
@@ -124,4 +124,4 @@ budget_planner_agent:
     - travel_guide_agent
     - stay_guide_agent
     - food_guide_agent
-  llm: openai/gpt-4o-mini
+  llm: openai/gpt-5-mini

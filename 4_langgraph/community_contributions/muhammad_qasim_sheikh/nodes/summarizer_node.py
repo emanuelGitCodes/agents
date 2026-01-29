@@ -7,10 +7,12 @@ api_wrapper = WikipediaAPIWrapper(top_k_results=2)
 wiki_tool = WikipediaQueryRun(
     name="wikipedia_search",
     description="Search Wikipedia for a given query.",
-    api_wrapper=api_wrapper
+    api_wrapper=api_wrapper,
 )
 
-research_agent_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0).bind_tools([wiki_tool])
+research_agent_llm = ChatOpenAI(model="gpt-5-mini", temperature=0).bind_tools(
+    [wiki_tool]
+)
 
 RESEARCH_AGENT_PROMPT = """
 You are a research assistant. You have access to a Wikipedia search tool.
@@ -22,6 +24,7 @@ The summary must be around 800 words.
 Do not include any additional commentary other than the summary itself.
 Put the actual URLs of the documents, add them in the reference section
 """
+
 
 def summarizer_agent_node(state: ResearchState) -> ResearchState:
     print("EXECUTING SUMMARIZER AGENT")
@@ -37,9 +40,14 @@ def summarizer_agent_node(state: ResearchState) -> ResearchState:
             response = research_agent_llm.invoke(query)
             summary = getattr(response, "content", str(response))
 
-            if "No good Wikipedia Search results found" in summary or "Page not found" in summary:
+            if (
+                "No good Wikipedia Search results found" in summary
+                or "Page not found" in summary
+            ):
                 print(f"No results for: {query}")
-                summarized_results.append(f"No information found on Wikipedia for: {query}")
+                summarized_results.append(
+                    f"No information found on Wikipedia for: {query}"
+                )
                 continue
 
             summarized_results.append(f"Topic: {topic}\nSummary: {summary.strip()}")
@@ -47,10 +55,10 @@ def summarizer_agent_node(state: ResearchState) -> ResearchState:
 
         except Exception as e:
             print(f"Failed to summarize '{topic}': {e}")
-            summarized_results.append(f"Topic: {topic}\nSummary: No summary available (error).")
+            summarized_results.append(
+                f"Topic: {topic}\nSummary: No summary available (error)."
+            )
 
     state.research_snippets = summarized_results
     print("Research Done")
     return state
-
-

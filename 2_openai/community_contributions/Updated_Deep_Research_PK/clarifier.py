@@ -22,13 +22,15 @@ class CreateQuestions(BaseModel):
     clarifying_question: str
     """Clarifying question to be asked to the user"""
 
+
 class ClarifyingQuestions(BaseModel):
     questions: list[CreateQuestions]
     """A list of clarifying questions to be asked to the user, along with their purpose."""
 
+
 clarifier_agent = Agent(
     name="ClarifierAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ClarifyingQuestions,
 )

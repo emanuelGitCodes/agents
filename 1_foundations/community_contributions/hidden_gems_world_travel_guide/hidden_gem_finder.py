@@ -9,7 +9,7 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Configuration
-MODEL = "gpt-5-nano"
+MODEL = "gpt-5-mini"
 COUNTRIES_BY_CONTINENT = {
     "Africa": ["Algeria", "Angola", "Kenya"],  # Expand as needed
     "Europe": ["France", "Slovenia", "Greece"],

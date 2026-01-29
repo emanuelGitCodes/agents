@@ -2,12 +2,14 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from state import ResearchState
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
+llm = ChatOpenAI(model="gpt-5-mini", temperature=0.2)
+
 
 class ReportEvaluation(BaseModel):
     feedback: str = Field(description="Critique of the report.")
     score: float = Field(description="Numeric relevance score between 1 and 10.")
     is_acceptable: bool = Field(description="True if report meets expectations.")
+
 
 def report_evaluator_node(state: ResearchState) -> ResearchState:
     print("EXECUTING: REPORT EVALUATOR NODE")
@@ -17,7 +19,7 @@ def report_evaluator_node(state: ResearchState) -> ResearchState:
     You are a senior research analyst. You are provided with the the following inputs:
     1. Full research context including the original query and clarifications: {state.full_context}
     2. Draft of a report: {state.report}
-    Your job is to evaluate the following: and 
+    Your job is to evaluate the following: and
     - Relevance to clarified intent.
     - Depth and factual grounding (use supporting summaries).
     - Structure and clarity.
@@ -39,6 +41,8 @@ def report_evaluator_node(state: ResearchState) -> ResearchState:
         state.best_report = state.report
         state.best_report_feedback = result.feedback
 
-    print(f"Report evaluation: score={result.score:.2f}, acceptable={result.is_acceptable}")
+    print(
+        f"Report evaluation: score={result.score:.2f}, acceptable={result.is_acceptable}"
+    )
     print("Feedback:", result.feedback, "\n")
     return state

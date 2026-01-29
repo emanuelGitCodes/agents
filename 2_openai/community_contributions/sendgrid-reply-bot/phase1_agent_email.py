@@ -27,6 +27,7 @@ sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
 # TOOL: Send Email (ONLY SIDE EFFECT)
 # =================================================
 
+
 @function_tool
 def send_email(email_body: str, reply_to_address: str):
     """
@@ -45,6 +46,7 @@ def send_email(email_body: str, reply_to_address: str):
     sg.client.mail.send.post(request_body=mail.get())
     return {"status": "sent"}
 
+
 # =================================================
 # Drafting Agents (NO SIDE EFFECTS)
 # =================================================
@@ -56,7 +58,7 @@ professional_agent = Agent(
         "a SaaS platform that helps companies achieve SOC2 compliance. "
         "Write a serious, polished cold email."
     ),
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 engaging_agent = Agent(
@@ -65,7 +67,7 @@ engaging_agent = Agent(
         "You are a witty, engaging sales agent for ComplAI. "
         "Write a friendly, conversational cold email that feels human."
     ),
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 busy_agent = Agent(
@@ -74,7 +76,7 @@ busy_agent = Agent(
         "You are a very busy sales agent for ComplAI. "
         "Write a short, direct cold email with minimal fluff."
     ),
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 # Convert drafting agents into tools
@@ -110,7 +112,7 @@ Your job:
 - Do not rewrite the email body
 """,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 # =================================================
@@ -137,12 +139,13 @@ Rules:
 """,
     tools=[professional_draft, engaging_draft, busy_draft],
     handoffs=[email_sender],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 # =================================================
 # MAIN
 # =================================================
+
 
 async def main():
     # Unique lead identifier
@@ -165,6 +168,7 @@ Reply-To Address (IMPORTANT — pass through unchanged):
     print("✅ Phase 1 complete")
     print("Lead ID:", lead_id)
     print("Reply-To:", reply_to_address)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -94,10 +94,10 @@ async with MCPServerStdio(params=weather_params, client_session_timeout_seconds=
         agent = Agent(
             name="weather_assistant",
             instructions="You are a weather assistant that helps users get weather information.",
-            model="gpt-4o-mini",
+            model="gpt-5-mini",
             mcp_servers=[weather_server, push_server]
         )
-        
+
         result = await Runner.run(
             agent,
             "Get current weather for Nairobi, Kenya"
@@ -158,4 +158,3 @@ The server gracefully handles:
 - Invalid parameters
 
 All errors are logged and returned in a structured format.
-

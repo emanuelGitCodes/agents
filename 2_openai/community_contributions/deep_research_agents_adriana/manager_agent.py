@@ -15,12 +15,11 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-openai_api_key = os.getenv('OPENAI_API_KEY')
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 tools = [search_tool, clarify_tool, answer_tool, planner_tool, report_tool, eval_tool]
-handoffs =[email_agent]
-
+handoffs = [email_agent]
 
 
 class EmailOut(BaseModel):
@@ -30,13 +29,13 @@ class EmailOut(BaseModel):
 
 
 INSTRUCTIONS = """You are the orchestrator for a multi-step research workflow.
-Use the provided tools for planning, searching, writing, and evaluation, and delegate the email sending via the provided handoff agent. 
-Never invent tool outputs. 
+Use the provided tools for planning, searching, writing, and evaluation, and delegate the email sending via the provided handoff agent.
+Never invent tool outputs.
 If a tool fails or returns invalid data, retry once with the same arguments.
 
 Follow the steps carefully:
-1. Call the clarify tool to obtain 3 clarifying questions. 
-   
+1. Call the clarify tool to obtain 3 clarifying questions.
+
 2. Call the answer tool to obtain the answers for the provided questions.
 
 3. Call the planner tool to get a WebSearchPlan.
@@ -47,18 +46,17 @@ Follow the steps carefully:
 
 6. Evaluate the report and give feedback if necessary.
 
-7. Handoff to email_agent with the final report so it generates a subject, 
-converts to clean HTML, sends the email, and returns subject and html_body;. 
+7. Handoff to email_agent with the final report so it generates a subject,
+converts to clean HTML, sends the email, and returns subject and html_body;.
 
 You MUST use all of the tools and handoffs provided to you. """
 
 
 manager_agent = Agent(
-    name = 'ManagerAgent',
-    instructions = INSTRUCTIONS,
-    tools = tools,
-    handoffs = handoffs,
-    model = 'gpt-4o-mini',
-    output_type = EmailOut,
-
+    name="ManagerAgent",
+    instructions=INSTRUCTIONS,
+    tools=tools,
+    handoffs=handoffs,
+    model="gpt-5-mini",
+    output_type=EmailOut,
 )

@@ -5,7 +5,8 @@ from langgraph.graph.message import add_messages
 from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
-#from langgraph.checkpoint.memory import MemorySaver
+
+# from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from typing import List, Any, Optional, Dict
@@ -30,7 +31,9 @@ class State(TypedDict):
 
 class EvaluatorOutput(BaseModel):
     feedback: str = Field(description="Feedback on the assistant's response")
-    success_criteria_met: bool = Field(description="Whether the success criteria have been met")
+    success_criteria_met: bool = Field(
+        description="Whether the success criteria have been met"
+    )
     user_input_needed: bool = Field(
         description="True if more input is needed from the user, or clarifications, or the assistant is stuck"
     )
@@ -68,14 +71,16 @@ class Sidekick:
         # Store the async context manager and enter it
         self.memory_context = AsyncSqliteSaver.from_conn_string("memory.db")
         self.memory = await self.memory_context.__aenter__()
-        
+
         self.tools, self.browser, self.playwright = await playwright_tools()
         self.tools += await other_tools()
-        worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
-        evaluator_llm = ChatOpenAI(model="gpt-4o-mini")
-        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(EvaluatorOutput)
-        planner_llm = ChatOpenAI(model="gpt-4o-mini")
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
+        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
+            EvaluatorOutput
+        )
+        planner_llm = ChatOpenAI(model="gpt-5-mini")
         self.planner_llm_with_output = planner_llm.with_structured_output(PlannerOutput)
         await self.build_graph()
 
@@ -83,10 +88,10 @@ class Sidekick:
         # If planning is already complete, skip to worker
         if state.get("planning_complete", False):
             return {"planning_complete": True}
-        
+
         questions_asked = state.get("clarifying_questions_asked", 0)
         max_questions = 3
-        
+
         system_message = f"""You are a planning agent that clarifies user requests before work begins.
 Your job is to ensure the user's intention and success criteria are crystal clear.
 
@@ -121,7 +126,7 @@ Decide if you need to ask a clarifying question, or if you're ready to proceed t
         ]
 
         planner_result = self.planner_llm_with_output.invoke(planner_messages)
-        
+
         # If ready to proceed or max questions reached
         if planner_result.ready_to_proceed or questions_asked >= max_questions:
             return {
@@ -133,7 +138,7 @@ Decide if you need to ask a clarifying question, or if you're ready to proceed t
                     }
                 ],
             }
-        
+
         # Need to ask a clarification question
         return {
             "clarifying_questions_asked": questions_asked + 1,
@@ -283,23 +288,25 @@ Decide if you need to ask a clarifying question, or if you're ready to proceed t
         # Add edges
         # Start with planner
         graph_builder.add_edge(START, "planner")
-        
+
         # Planner routes to worker or END
         graph_builder.add_conditional_edges(
             "planner", self.planner_router, {"worker": "worker", "END": END}
         )
-        
+
         # Worker routes to tools or evaluator
         graph_builder.add_conditional_edges(
             "worker", self.worker_router, {"tools": "tools", "evaluator": "evaluator"}
         )
-        
+
         # Tools go back to worker
         graph_builder.add_edge("tools", "worker")
-        
+
         # Evaluator routes back to worker or END
         graph_builder.add_conditional_edges(
-            "evaluator", self.route_based_on_evaluation, {"worker": "worker", "END": END}
+            "evaluator",
+            self.route_based_on_evaluation,
+            {"worker": "worker", "END": END},
         )
 
         # Compile the graph
@@ -310,7 +317,8 @@ Decide if you need to ask a clarifying question, or if you're ready to proceed t
 
         state = {
             "messages": message,
-            "success_criteria": success_criteria or "The answer should be clear and accurate",
+            "success_criteria": success_criteria
+            or "The answer should be clear and accurate",
             "feedback_on_work": None,
             "success_criteria_met": False,
             "user_input_needed": False,
@@ -329,10 +337,10 @@ Decide if you need to ask a clarifying question, or if you're ready to proceed t
             await self.browser.close()
             if self.playwright:
                 await self.playwright.stop()
-        
+
         if self.memory_context:
             await self.memory_context.__aexit__(None, None, None)
-    
+
     def cleanup(self):
         """Synchronous cleanup wrapper"""
         try:

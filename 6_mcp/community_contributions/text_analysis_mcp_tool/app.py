@@ -6,13 +6,13 @@ import gradio as gr
 load_dotenv(override=True)
 
 # Configuration
-INSTRUCTIONS = """You are a document analysis assistant. The user has provided a document file path that you should analyze. 
+INSTRUCTIONS = """You are a document analysis assistant. The user has provided a document file path that you should analyze.
 You can extract text from docx, doc, pdf, and txt files. You can also provide basic statistics on the text and do readability assessments.
 When the user first provides a file path, acknowledge it, provide some basic statistics and a one line reference to what the document contains.
 For follow-up questions, continue to use the appropriate tools to answer their specific requests about the document.
 You should extract the file type from the file path provided."""
 
-MODEL = "gpt-4.1-mini"
+MODEL = "gpt-5-mini"
 MCP_PARAMS = {"command": "uv", "args": ["run", "document_server.py"]}
 
 # Create agent - add MCP servers at run
@@ -30,23 +30,23 @@ async def respond(message, history):
     # Extract text and files from message
     text_content = message.get("text", "").strip()
     files = message.get("files", [])
-    
+
     # Create session ID
     session_id = "document_chat_session"
     if session_id not in session_store:
         session_store[session_id] = SQLiteSession(session_id)
     session = session_store[session_id]
-  
+
     if hasattr(session, 'trace_id') and session.trace_id:
         trace_id = session.trace_id
     else:
         trace_id = gen_trace_id()
         session.trace_id = trace_id
-    
+
     with trace("Document chat", trace_id=trace_id):
         print(f"View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}")
-    
-        # Build the message for the agent  
+
+        # Build the message for the agent
         if files:
             # New document uploaded
             full_message = f"Please analyze this document and provide some basic details based on the tools available: {files[0]}"
@@ -60,11 +60,11 @@ async def respond(message, history):
             full_message = text_content
 
         try:
-            # Create MCP server and run with session       
+            # Create MCP server and run with session
             async with MCPServerStdio(params=MCP_PARAMS, client_session_timeout_seconds=30) as mcp_server:
                 # Add MCP server to agent for this run
                 document_agent.mcp_servers = [mcp_server]
-                
+
                 result = await Runner.run(
                     document_agent,
                     full_message,

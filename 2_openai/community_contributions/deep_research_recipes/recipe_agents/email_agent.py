@@ -60,5 +60,5 @@ recipe_email_agent = Agent(
     name="RecipeEmailAgent",
     instructions=INSTRUCTIONS,
     tools=[send_email],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )

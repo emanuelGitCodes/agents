@@ -16,7 +16,7 @@ def push(text):
             "token": os.getenv("PUSHOVER_TOKEN"),
             "user": os.getenv("PUSHOVER_USER"),
             "message": text,
-        }
+        },
     )
 
 
@@ -38,21 +38,20 @@ record_user_details_json = {
         "properties": {
             "email": {
                 "type": "string",
-                "description": "The email address of this user"
+                "description": "The email address of this user",
             },
             "name": {
                 "type": "string",
-                "description": "The user's name, if they provided it"
-            }
-            ,
+                "description": "The user's name, if they provided it",
+            },
             "notes": {
                 "type": "string",
-                "description": "Any additional information about the conversation that's worth recording to give context"
-            }
+                "description": "Any additional information about the conversation that's worth recording to give context",
+            },
         },
         "required": ["email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 record_unknown_question_json = {
@@ -63,16 +62,18 @@ record_unknown_question_json = {
         "properties": {
             "question": {
                 "type": "string",
-                "description": "The question that couldn't be answered"
+                "description": "The question that couldn't be answered",
             },
         },
         "required": ["question"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
-tools = [{"type": "function", "function": record_user_details_json},
-         {"type": "function", "function": record_unknown_question_json}]
+tools = [
+    {"type": "function", "function": record_user_details_json},
+    {"type": "function", "function": record_unknown_question_json},
+]
 
 
 class Me:
@@ -83,7 +84,7 @@ class Me:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         pdf_path = os.path.join(script_dir, "me", "linkedin.pdf")
         summary_path = os.path.join(script_dir, "me", "summary.txt")
-        
+
         reader = PdfReader(pdf_path)
         self.linkedin = ""
         for page in reader.pages:
@@ -101,7 +102,13 @@ class Me:
             print(f"Tool called: {tool_name}", flush=True)
             tool = globals().get(tool_name)
             result = tool(**arguments) if tool else {}
-            results.append({"role": "tool", "content": json.dumps(result), "tool_call_id": tool_call.id})
+            results.append(
+                {
+                    "role": "tool",
+                    "content": json.dumps(result),
+                    "tool_call_id": tool_call.id,
+                }
+            )
         return results
 
     def system_prompt(self):
@@ -118,11 +125,16 @@ If the user is engaging in discussion, try to steer them towards getting in touc
         return system_prompt
 
     def chat(self, message, history):
-        messages = [{"role": "system", "content": self.system_prompt()}] + history + [
-            {"role": "user", "content": message}]
+        messages = (
+            [{"role": "system", "content": self.system_prompt()}]
+            + history
+            + [{"role": "user", "content": message}]
+        )
         done = False
         while not done:
-            response = self.openai.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=tools)
+            response = self.openai.chat.completions.create(
+                model="gpt-5-mini", messages=messages, tools=tools
+            )
             if response.choices[0].finish_reason == "tool_calls":
                 message = response.choices[0].message
                 tool_calls = message.tool_calls
@@ -136,10 +148,16 @@ If the user is engaging in discussion, try to steer them towards getting in touc
 
 if __name__ == "__main__":
     me = Me()
-    gr.ChatInterface(me.chat, type="messages", chatbot=gr.Chatbot(
+    gr.ChatInterface(
+        me.chat,
+        type="messages",
+        chatbot=gr.Chatbot(
             type="messages",
-            value=[{
-                "role": "assistant",
-                "content": "Hi, my name is Seung-Gu! I'd be happy to share more about my career path — feel free to ask me any questions!"
-            }])
+            value=[
+                {
+                    "role": "assistant",
+                    "content": "Hi, my name is Seung-Gu! I'd be happy to share more about my career path — feel free to ask me any questions!",
+                }
+            ],
+        ),
     ).launch()

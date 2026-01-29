@@ -28,10 +28,10 @@ async def main():
     url1 = 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Lionel_Messi_20180626.jpg'
     url2 = 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg'
     request = f"""
-    My name is John and I have two URLs and would like to determine if they contain the same face according to insightface. 
+    My name is John and I have two URLs and would like to determine if they contain the same face according to insightface.
     The first url is {url1} and the second url is: {url2}.
     """
-    model = "gpt-4.1-mini"
+    model = "gpt-5-mini"
 
     async with MCPServerStdio(params=params, client_session_timeout_seconds=30) as mcp_server:
         agent = Agent(name="face_manager", instructions=instructions, model=model, mcp_servers=[mcp_server])
@@ -42,7 +42,7 @@ async def main():
     print("\n" + "-" * 100 + "\n")
 
     request = f"""
-    My name is John and I have two URLs and would like to determine if they contain the same face according to insightface. 
+    My name is John and I have two URLs and would like to determine if they contain the same face according to insightface.
     The first url is {url1} and the second url is: {url2}.
     I would also like to know more about the inviduals present in each image.
     """

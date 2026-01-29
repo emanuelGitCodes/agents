@@ -36,6 +36,7 @@ Output {HOW_MANY_SEARCHES} strategic web search terms that are precisely tuned t
 
 class WebSearchItem(BaseModel):
     """Individual web search with reasoning"""
+
     reason: str = Field(
         description="Detailed reasoning explaining how this search addresses the original query AND the user's clarifications"
     )
@@ -46,10 +47,11 @@ class WebSearchItem(BaseModel):
 
 class WebSearchPlan(BaseModel):
     """Complete search strategy tuned to user's clarified needs"""
+
     searches: list[WebSearchItem] = Field(
         description=f"A list of {HOW_MANY_SEARCHES} strategically planned searches, carefully tuned based on the user's clarifications"
     )
-    
+
     strategy_summary: str = Field(
         description="Brief explanation of how the search strategy was adapted based on the user's clarifications"
     )
@@ -58,7 +60,6 @@ class WebSearchPlan(BaseModel):
 planner_agent = Agent(
     name="PlannerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=WebSearchPlan,
 )
-

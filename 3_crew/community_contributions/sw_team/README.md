@@ -2,15 +2,15 @@
 
 folder: eng_team_flow
 
-I have implemented a software engineer team using CREWAI Flows. This team consists of 
+I have implemented a software engineer team using CREWAI Flows. This team consists of
 one business personal, one technical manager, 1 software engineer and 1 tech lead agents.
-It has a self eval loop between business personal and tech manager wherein tech manager 
+It has a self eval loop between business personal and tech manager wherein tech manager
 upto 3 times can ask clarifications.
 Tech manager then creates task for software engineer to develop.
 Software engineer once done with code generation passes the code to the tech lead to review.
 Tech lead upto 3 times can ask software engineer to do code improvements.
 Agents used:
-gpt-4o-mini     - business personal
+gpt-5-mini     - business personal
 gpt-4o          - tech manager
 claude-sonnet-4 - software engineer / tech lead
 
@@ -30,11 +30,11 @@ Challenges and findings:
 
 folder: eng_team_flow_se_agents_combined
 
-I have implemented a software engineer team using CREWAI Flows. This team consists of 
+I have implemented a software engineer team using CREWAI Flows. This team consists of
 one business personal, one technical manager, 1 software engineer, 1 tech lead and 1 code summarizer agents.
-THE MAIN DIFFERENCE FROM THE PREVIOUS ONE IS SOFTWARE ENGINEER, TECH LEAD AND CODE SUMMARIZER ARE ALL THE PART 
+THE MAIN DIFFERENCE FROM THE PREVIOUS ONE IS SOFTWARE ENGINEER, TECH LEAD AND CODE SUMMARIZER ARE ALL THE PART
 OF THE SAME CREW TO EASE CONTEXT MAAGEMENT AND TO SEE IF THE FLOW CHANGE HELPS.
-It has a self eval loop between business personal and tech manager wherein tech manager 
+It has a self eval loop between business personal and tech manager wherein tech manager
 upto 3 times can ask clarifications.
 I did enable delegation and see if it improes the output, but result shows not much of help comes up. Maybe I should approach in a different manner possibly.
 Tech manager then creates task for software engineer to develop.
@@ -42,10 +42,10 @@ For every tas:
 *   Software engineer once done with code generation passes the code to the tech lead to review.
 *   Tech lead passes the context to code summarizer.
 *   The output from code summarizer is fed to the software engineer again.
-The loop goes on for either max 2 times or if the code generated is correct according to the tech lead. 
+The loop goes on for either max 2 times or if the code generated is correct according to the tech lead.
 
 Agents used:
-gpt-4o-mini     - business personal
+gpt-5-mini     - business personal
 gpt-4o          - tech manager
 gpt-4o - software engineer / code summarizer
 claude-sonnet-4 - tech lead

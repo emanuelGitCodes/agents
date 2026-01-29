@@ -22,15 +22,16 @@ lastnames = ["Patience", "Bold", "Systematic", "Crypto"]
 
 if USE_MANY_MODELS:
     model_names = [
-        "gpt-4o-mini",
+        "gpt-5-mini",
         "gpt-4o",
-        "gpt-4o-mini",
+        "gpt-5-mini",
         "gpt-4o",
     ]
     short_model_names = ["GPT 4o Mini", "GPT 4o", "GPT 4o Mini", "GPT 4o"]
 else:
-    model_names = ["gpt-4o-mini"] * 4
+    model_names = ["gpt-5-mini"] * 4
     short_model_names = ["GPT 4o mini"] * 4
+
 
 def create_traders() -> List[Trader]:
     traders = []
@@ -38,11 +39,12 @@ def create_traders() -> List[Trader]:
         traders.append(Trader(name, lastname, model_name))
     return traders
 
+
 async def run_every_n_minutes():
     add_trace_processor(LogTracer())
     traders = create_traders()
-    risk_manager = RiskManager(names, model_name="gpt-4o-mini")
-    news_sentinel = NewsSentinel(names, model_name="gpt-4o-mini")
+    risk_manager = RiskManager(names, model_name="gpt-5-mini")
+    news_sentinel = NewsSentinel(names, model_name="gpt-5-mini")
 
     iteration = 0
     while True:
@@ -64,6 +66,7 @@ async def run_every_n_minutes():
             print("Market is closed, skipping run")
 
         await asyncio.sleep(RUN_EVERY_N_MINUTES * 60)
+
 
 if __name__ == "__main__":
     print(f"Starting scheduler to run every {RUN_EVERY_N_MINUTES} minutes")

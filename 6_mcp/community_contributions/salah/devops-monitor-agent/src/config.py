@@ -24,7 +24,7 @@ def get_env_str(key: str, default: str) -> str:
 
 class Config:
     OPENAI_API_KEY = get_env_str("OPENAI_API_KEY", "")
-    MODEL_NAME = get_env_str("MODEL_NAME", "gpt-4o-mini")
+    MODEL_NAME = get_env_str("MODEL_NAME", "gpt-5-mini")
     MAX_TURNS_MONITOR = get_env_int("MAX_TURNS_MONITOR", 5)
     MAX_TURNS_ALERT = get_env_int("MAX_TURNS_ALERT", 8)
     MCP_TIMEOUT = get_env_int("MCP_TIMEOUT", 60)

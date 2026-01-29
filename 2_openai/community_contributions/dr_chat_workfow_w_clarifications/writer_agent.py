@@ -12,18 +12,25 @@ INSTRUCTIONS = (
 
 
 class ReportData(BaseModel):
-    short_summary: str = Field(description="A short 2-3 sentence summary of the findings.")
+    short_summary: str = Field(
+        description="A short 2-3 sentence summary of the findings."
+    )
 
     markdown_report: str = Field(description="The final report")
 
-    follow_up_questions: list[str] = Field(description="Suggested topics to research further")
+    follow_up_questions: list[str] = Field(
+        description="Suggested topics to research further"
+    )
 
 
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ReportData,
 )
 
-writer_tool = writer_agent.as_tool(tool_name="writer_agent", tool_description="A tool to write a report for a research query.")
+writer_tool = writer_agent.as_tool(
+    tool_name="writer_agent",
+    tool_description="A tool to write a report for a research query.",
+)

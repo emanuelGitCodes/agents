@@ -9,15 +9,16 @@ import asyncio
 # === Define Orchestrator Agent (Lab 2 style) ===
 orchestrator_agent = Agent(
     name="Research Orchestrator",
-    instructions="",  
-    tools=[],         
-    model="gpt-4o-mini",
-    handoff_description="Coordinate clarifier, planner, search, writer, and email in sequence."
+    instructions="",
+    tools=[],
+    model="gpt-5-mini",
+    handoff_description="Coordinate clarifier, planner, search, writer, and email in sequence.",
 )
+
 
 class ResearchManager:
     def __init__(self):
-        self.clarifier_used = False  
+        self.clarifier_used = False
 
         # Register helpers as tools but keep them callable
         self.tools = [
@@ -44,7 +45,9 @@ class ResearchManager:
 
     async def perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
         """Looks up information for each step in the research plan."""
-        tasks = [asyncio.create_task(self.search(item)) for item in search_plan.searches]
+        tasks = [
+            asyncio.create_task(self.search(item)) for item in search_plan.searches
+        ]
         results = []
         for task in asyncio.as_completed(tasks):
             res = await task
@@ -55,14 +58,19 @@ class ResearchManager:
     async def search(self, item: WebSearchItem) -> str | None:
         """Perform a single search query."""
         try:
-            result = await Runner.run(search_agent, f"Search term: {item.query}\nReason: {item.reason}")
+            result = await Runner.run(
+                search_agent, f"Search term: {item.query}\nReason: {item.reason}"
+            )
             return str(result.final_output)
         except Exception:
             return None
 
     async def write_report(self, query: str, search_results: list[str]) -> ReportData:
         """Drafts a research report based on all findings."""
-        result = await Runner.run(writer_agent, f"Original query: {query}\nSummarized results: {search_results}")
+        result = await Runner.run(
+            writer_agent,
+            f"Original query: {query}\nSummarized results: {search_results}",
+        )
         return result.final_output_as(ReportData)
 
     async def send_email(self, report: ReportData) -> None:
@@ -72,7 +80,7 @@ class ResearchManager:
 
     async def orchestrator(self, query: str, clarifications: str = ""):
         orchestrator_agent.instructions = """
-        You are the Orchestrator for the Deep Research process. 
+        You are the Orchestrator for the Deep Research process.
         You receive a research query (and optional clarifications) and manage the research workflow.
 
         The required order of execution is:
@@ -92,7 +100,7 @@ class ResearchManager:
         orchestrator_agent.tools = self.tools
         return await Runner.run(
             orchestrator_agent,
-            f"Research query: {query}\nClarifications: {clarifications}"
+            f"Research query: {query}\nClarifications: {clarifications}",
         )
 
     async def run(self, query: str, clarifications: str = ""):

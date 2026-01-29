@@ -1,12 +1,14 @@
 from pydantic import BaseModel, Field
 from agents import Agent
 
+
 class ClarifyingQuestions(BaseModel):
     questions: list[str] = Field(
         description="Exactly 3 clarifying questions to better understand the research needs",
-        min_items=3,  
-        max_items=3   
+        min_items=3,
+        max_items=3,
     )
+
 
 INSTRUCTIONS = """You are a research assistant that helps clarify research queries.
 
@@ -31,7 +33,7 @@ Return exactly 3 questions in the specified format."""
 clarification_agent = Agent(
     name="Clarification Agent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ClarifyingQuestions,
-    handoff_description="Generate clarifying questions to better understand research needs"
+    handoff_description="Generate clarifying questions to better understand research needs",
 )

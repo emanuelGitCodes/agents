@@ -24,6 +24,7 @@ app = FastAPI()
 # Tool: send reply email (side effect)
 # ----------------------------------
 
+
 @function_tool
 def send_reply(to_email: str, subject: str, body: str):
     """Send a single reply email to the prospect."""
@@ -35,6 +36,7 @@ def send_reply(to_email: str, subject: str, body: str):
     )
     sg.client.mail.send.post(request_body=mail.get())
     return {"status": "reply_sent"}
+
 
 # ----------------------------------
 # SDR Reply Agent
@@ -52,12 +54,13 @@ Rules:
 - Keep replies under 120 words
 """,
     tools=[send_reply],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
 
 # ----------------------------------
 # Webhook endpoint
 # ----------------------------------
+
 
 @app.post("/webhooks/sendgrid/reply")
 async def receive_reply(request: Request):
@@ -82,7 +85,7 @@ Message:
 {message_text}
 
 Write a concise, helpful reply and send it using the send_reply tool.
-"""
+""",
     )
 
     return {"status": "ok"}

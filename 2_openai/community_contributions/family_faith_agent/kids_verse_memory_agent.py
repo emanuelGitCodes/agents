@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from agents import Agent
 
+
 class VerseMemoryPlan(BaseModel):
     call_and_response: str = Field(
         description="A simple call-and-response way to say the verse with kids."
@@ -14,6 +15,7 @@ class VerseMemoryPlan(BaseModel):
     encouragement_words: str = Field(
         description="Short encouragement for parents to cheer their kids on."
     )
+
 
 VERSE_MEMORY_INSTRUCTIONS = """
 You are the Little Seeds Verse Memory Agent.
@@ -40,6 +42,6 @@ Keep it short, joyful, and age-appropriate.
 joyful_kids_verse_memory_agent = Agent(
     name="LittleSeedsVerseMemoryAgent",
     instructions=VERSE_MEMORY_INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=VerseMemoryPlan,
 )

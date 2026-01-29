@@ -29,7 +29,7 @@ if USE_OLLAMA:
     client = AsyncOpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
     MODEL = OpenAIChatCompletionsModel(model=OLLAMA_MODEL, openai_client=client)
 else:
-    MODEL = "gpt-4o-mini"
+    MODEL = "gpt-5-mini"
 
 # Configure tracing based on model choice
 # When using Ollama: Use custom local tracing to capture execution traces as JSON files
@@ -42,13 +42,15 @@ else:
 
 async def test_uvx_server():
     """Test uvx-based MCP server (mcp-server-fetch)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing UVX-based MCP Server (Fetch)")
-    print("="*60)
-    
+    print("=" * 60)
+
     fetch_params = {"command": "uvx", "args": ["mcp-server-fetch"]}
-    
-    async with MCPServerStdio(params=fetch_params, client_session_timeout_seconds=60) as server:
+
+    async with MCPServerStdio(
+        params=fetch_params, client_session_timeout_seconds=60
+    ) as server:
         tools = await server.list_tools()
         print(f"✅ Fetch server loaded with {len(tools)} tool(s)")
         for tool in tools:
@@ -57,19 +59,21 @@ async def test_uvx_server():
 
 async def test_npx_server():
     """Test npx-based MCP server (filesystem)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing NPX-based MCP Server (Filesystem)")
-    print("="*60)
-    
+    print("=" * 60)
+
     sandbox_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "sandbox"))
     os.makedirs(sandbox_path, exist_ok=True)
-    
+
     fs_params = {
-        "command": "npx", 
-        "args": ["-y", "@modelcontextprotocol/server-filesystem", sandbox_path]
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", sandbox_path],
     }
-    
-    async with MCPServerStdio(params=fs_params, client_session_timeout_seconds=60) as server:
+
+    async with MCPServerStdio(
+        params=fs_params, client_session_timeout_seconds=60
+    ) as server:
         tools = await server.list_tools()
         print(f"✅ Filesystem server loaded with {len(tools)} tool(s)")
         for tool in tools:
@@ -78,15 +82,15 @@ async def test_npx_server():
 
 async def test_agent_with_both_servers():
     """Test an agent using both uvx and npx MCP servers together."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Agent with Both Servers")
-    print("="*60)
-    
+    print("=" * 60)
+
     fetch_params = {"command": "uvx", "args": ["mcp-server-fetch"]}
     sandbox_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "sandbox"))
     fs_params = {
-        "command": "npx", 
-        "args": ["-y", "@modelcontextprotocol/server-filesystem", sandbox_path]
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", sandbox_path],
     }
     instructions = """
 You are a specialized agent for downloading web content and saving it to files.
@@ -106,22 +110,23 @@ Execute step by step:
 2. After fetch succeeds, use write_file to save the downloaded text to sandbox/demo_py.html
 """
 
-    async with MCPServerStdio(params=fetch_params, client_session_timeout_seconds=60) as fetch_server:
-        async with MCPServerStdio(params=fs_params, client_session_timeout_seconds=60) as fs_server:
+    async with MCPServerStdio(
+        params=fetch_params, client_session_timeout_seconds=60
+    ) as fetch_server:
+        async with MCPServerStdio(
+            params=fs_params, client_session_timeout_seconds=60
+        ) as fs_server:
 
             agent = Agent(
                 name="demo_agent",
                 instructions=instructions,
                 model=MODEL,
-                mcp_servers=[fetch_server, fs_server]
+                mcp_servers=[fetch_server, fs_server],
             )
-            
+
             with trace("windows_no_wsl"):
-                result = await Runner.run(
-                    agent, 
-                    prompt
-                )
-            
+                result = await Runner.run(agent, prompt)
+
             print(f"✅ Agent completed task")
             print(f"   Result: {result.final_output}")
             if not USE_OLLAMA:
@@ -131,20 +136,20 @@ Execute step by step:
 async def main():
     """Run all demonstrations."""
     load_dotenv(override=True)
-    
-    print("\n" + "="*60)
+
+    print("\n" + "=" * 60)
     print("Windows MCP Server Patch Demo")
-    print("="*60)
-    
+    print("=" * 60)
+
     # Note: This patch may have no effect on recent Python versions (3.8+)
     # that use ProactorEventLoop by default on Windows
     winpatch_mcpserver_stdio()
-    
+
     try:
         await test_uvx_server()
         await test_npx_server()
         await test_agent_with_both_servers()
-        
+
     except Exception as e:
         print(f"\n❌ Error occurred: {e}")
         raise

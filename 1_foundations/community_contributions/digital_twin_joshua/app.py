@@ -24,7 +24,7 @@ def push(text):
                 "user": user,
                 "message": text,
             },
-            timeout=10
+            timeout=10,
         )
         response.raise_for_status()
         print(f"Pushover: Message sent successfully", flush=True)
@@ -35,7 +35,10 @@ def push(text):
 
 
 def record_user_details(email, name="Name not provided", notes="not provided"):
-    print(f"Tool called: record_user_details(email={email}, name={name}, notes={notes})", flush=True)
+    print(
+        f"Tool called: record_user_details(email={email}, name={name}, notes={notes})",
+        flush=True,
+    )
     message = f"New contact: {name}\nEmail: {email}\nNotes: {notes}"
     push(message)
     return {"recorded": "ok"}
@@ -55,20 +58,20 @@ record_user_details_json = {
         "properties": {
             "email": {
                 "type": "string",
-                "description": "The actual email address provided by the user in their message. Extract it exactly as they wrote it. Must be a real email address, not a placeholder."
+                "description": "The actual email address provided by the user in their message. Extract it exactly as they wrote it. Must be a real email address, not a placeholder.",
             },
             "name": {
                 "type": "string",
-                "description": "The user's name, if they provided it. Use 'Name not provided' if no name was given."
+                "description": "The user's name, if they provided it. Use 'Name not provided' if no name was given.",
             },
             "notes": {
                 "type": "string",
-                "description": "Any additional information about the conversation that's worth recording to give context. Use 'not provided' if there's nothing notable."
-            }
+                "description": "Any additional information about the conversation that's worth recording to give context. Use 'not provided' if there's nothing notable.",
+            },
         },
         "required": ["email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 
@@ -80,17 +83,19 @@ record_unknown_question_json = {
         "properties": {
             "question": {
                 "type": "string",
-                "description": "The question that couldn't be answered"
+                "description": "The question that couldn't be answered",
             },
         },
         "required": ["question"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 
-tools = [{"type": "function", "function": record_user_details_json},
-         {"type": "function", "function": record_unknown_question_json}]
+tools = [
+    {"type": "function", "function": record_user_details_json},
+    {"type": "function", "function": record_unknown_question_json},
+]
 
 
 class Me:
@@ -131,17 +136,25 @@ class Me:
             print(f"Arguments: {arguments}", flush=True)
             tool = globals().get(tool_name)
             result = tool(**arguments) if tool else {}
-            results.append({"role": "tool", "content": json.dumps(result), "tool_call_id": tool_call.id})
+            results.append(
+                {
+                    "role": "tool",
+                    "content": json.dumps(result),
+                    "tool_call_id": tool_call.id,
+                }
+            )
         return results
 
     def system_prompt(self):
-        system_prompt = f"You are acting as {self.name}. You are answering questions on {self.name}'s website, " \
-                        f"particularly questions related to {self.name}'s career, background, skills and experience. " \
-                        f"Your responsibility is to represent {self.name} for interactions on the website as faithfully as possible. " \
-                        f"You are given a summary, a LinkedIn profile, and a resume which you can use to answer questions. " \
-                        f"Be professional and engaging, as if talking to a potential client or future employer who came across the website. " \
-                        f"If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer. " \
-                        f"If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool. "
+        system_prompt = (
+            f"You are acting as {self.name}. You are answering questions on {self.name}'s website, "
+            f"particularly questions related to {self.name}'s career, background, skills and experience. "
+            f"Your responsibility is to represent {self.name} for interactions on the website as faithfully as possible. "
+            f"You are given a summary, a LinkedIn profile, and a resume which you can use to answer questions. "
+            f"Be professional and engaging, as if talking to a potential client or future employer who came across the website. "
+            f"If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer. "
+            f"If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool. "
+        )
 
         system_prompt += f"\n\n## Summary:\n{self.summary}\n\n## LinkedIn Profile:\n{self.linkedin}\n\n## Resume:\n{self.resume}\n\n"
         system_prompt += f"With this context, please chat with the user, always staying in character as {self.name}."
@@ -176,7 +189,9 @@ class Me:
             ],
         }
         try:
-            r = requests.post(url, headers=headers, data=json.dumps(payload), timeout=60)
+            r = requests.post(
+                url, headers=headers, data=json.dumps(payload), timeout=60
+            )
             r.raise_for_status()
             out = r.json()
             parts = out.get("content", [])
@@ -195,11 +210,17 @@ class Me:
 
     def chat(self, message, history):
         base_system = self.system_prompt()
-        messages = [{"role": "system", "content": base_system}] + history + [{"role": "user", "content": message}]
+        messages = (
+            [{"role": "system", "content": base_system}]
+            + history
+            + [{"role": "user", "content": message}]
+        )
         # First attempt
         done = False
         while not done:
-            response = self.openai.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=tools)
+            response = self.openai.chat.completions.create(
+                model="gpt-5-mini", messages=messages, tools=tools
+            )
             if response.choices[0].finish_reason == "tool_calls":
                 tool_msg = response.choices[0].message
                 tool_calls = tool_msg.tool_calls
@@ -211,7 +232,9 @@ class Me:
         reply = response.choices[0].message.content
 
         # Evaluate and optionally retry up to 2 times
-        eval_history = [m for m in messages if m["role"] in ("system", "user", "assistant", "tool")]
+        eval_history = [
+            m for m in messages if m["role"] in ("system", "user", "assistant", "tool")
+        ]
         evaluation = self._evaluate_with_anthropic(reply, message, eval_history)
         attempts = 0
         while not evaluation.get("is_acceptable", True) and attempts < 2:
@@ -222,10 +245,16 @@ class Me:
                 f"Reason for rejection (from evaluator):\n{evaluation.get('feedback','')}\n\n"
                 "Revise your answer to address the feedback while staying faithful to the provided documents."
             )
-            messages = [{"role": "system", "content": improved_system}] + history + [{"role": "user", "content": message}]
+            messages = (
+                [{"role": "system", "content": improved_system}]
+                + history
+                + [{"role": "user", "content": message}]
+            )
             done = False
             while not done:
-                response = self.openai.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=tools)
+                response = self.openai.chat.completions.create(
+                    model="gpt-5-mini", messages=messages, tools=tools
+                )
                 if response.choices[0].finish_reason == "tool_calls":
                     tool_msg = response.choices[0].message
                     tool_calls = tool_msg.tool_calls
@@ -235,7 +264,11 @@ class Me:
                 else:
                     done = True
             reply = response.choices[0].message.content
-            eval_history = [m for m in messages if m["role"] in ("system", "user", "assistant", "tool")]
+            eval_history = [
+                m
+                for m in messages
+                if m["role"] in ("system", "user", "assistant", "tool")
+            ]
             evaluation = self._evaluate_with_anthropic(reply, message, eval_history)
 
         return reply
@@ -244,5 +277,3 @@ class Me:
 if __name__ == "__main__":
     me = Me()
     gr.ChatInterface(me.chat, type="messages").launch()
-
-

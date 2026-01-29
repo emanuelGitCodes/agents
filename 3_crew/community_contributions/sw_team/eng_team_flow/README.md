@@ -1,14 +1,14 @@
 # Software Engineer Team
 
-I have implemented a software engineer team using CREWAI Flows. This team consists of 
+I have implemented a software engineer team using CREWAI Flows. This team consists of
 one business personal, one technical manager, 1 software engineer and 1 tech lead agents.
-It has a self eval loop between business personal and tech manager wherein tech manager 
+It has a self eval loop between business personal and tech manager wherein tech manager
 upto 3 times can ask clarifications.
 Tech manager then creates task for software engineer to develop.
 Software engineer once done with code generation passes the code to the tech lead to review.
 Tech lead upto 3 times can ask software engineer to do code improvements.
 Agents used:
-gpt-4o-mini     - business personal
+gpt-5-mini     - business personal
 gpt-40          - tech manager
 claude-sonnet-4 - software engineer / tech lead
 

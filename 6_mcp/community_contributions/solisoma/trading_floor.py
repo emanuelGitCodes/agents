@@ -23,15 +23,21 @@ lastnames = ["Patience", "Bold", "Systematic", "Crypto", "Sentiment"]
 
 if USE_MANY_MODELS:
     model_names = [
-        "gpt-4.1-mini",
+        "gpt-5-mini",
         "deepseek-chat",
-        "gemini-2.5-flash-preview-04-17",
+        "gemini-3-flash-preview-preview-04-17",
         "grok-3-mini-beta",
-        "gpt-4o-mini",  # Solisoma uses GPT
+        "gpt-5-mini",  # Solisoma uses GPT
     ]
-    short_model_names = ["GPT 4.1 Mini", "DeepSeek V3", "Gemini 2.5 Flash", "Grok 3 Mini", "GPT 4o mini"]
+    short_model_names = [
+        "GPT 4.1 Mini",
+        "DeepSeek V3",
+        "Gemini 2.5 Flash",
+        "Grok 3 Mini",
+        "GPT 4o mini",
+    ]
 else:
-    model_names = ["gpt-4o-mini"] * 5
+    model_names = ["gpt-5-mini"] * 5
     short_model_names = ["GPT 4o mini"] * 5
 
 
@@ -41,7 +47,7 @@ def setup_solisoma():
 
     # Override trader instructions
     original_trader_instructions = templates.trader_instructions
-    
+
     def custom_trader_instructions(name):
         if name == "Solisoma":
             return """
@@ -60,7 +66,7 @@ def setup_solisoma():
             - Trade on momentum, not fundamentals
             """
         return original_trader_instructions(name)
-    
+
     templates.trader_instructions = custom_trader_instructions
 
 
@@ -78,7 +84,7 @@ async def run_every_n_minutes():
     add_trace_processor(LogTracer())
     traders = create_traders()
     print(f"5 traders initialized: {names}")
-    
+
     while True:
         if RUN_EVEN_WHEN_MARKET_IS_CLOSED or is_market_open():
             print(f"\nRunning trading cycle for {len(traders)} traders...")
@@ -93,4 +99,3 @@ if __name__ == "__main__":
     print(f"Starting scheduler to run every {RUN_EVERY_N_MINUTES} minutes")
     print(f"5 traders: {names}")
     asyncio.run(run_every_n_minutes())
-

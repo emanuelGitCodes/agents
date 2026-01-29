@@ -14,18 +14,29 @@ INSTRUCTIONS = (
     f"Output exactly {HOW_MANY_SEARCHES} search queries that will best answer the research needs."
 )
 
+
 class WebSearchItem(BaseModel):
-    reason: str = Field(description="Your reasoning for why this search is important to the query")
+    reason: str = Field(
+        description="Your reasoning for why this search is important to the query"
+    )
     query: str = Field(description="The search term to use for the web search")
-    expected_focus: str = Field(description="What specific aspect of the research this search will help with")
+    expected_focus: str = Field(
+        description="What specific aspect of the research this search will help with"
+    )
+
 
 class WebSearchPlan(BaseModel):
-    searches: list[WebSearchItem] = Field(description="A list of web searches to perform to best answer the query")
-    overall_strategy: str = Field(description="Brief explanation of the overall search strategy")
+    searches: list[WebSearchItem] = Field(
+        description="A list of web searches to perform to best answer the query"
+    )
+    overall_strategy: str = Field(
+        description="Brief explanation of the overall search strategy"
+    )
+
 
 planner_agent = Agent(
     name="PlannerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=WebSearchPlan,
-) 
+)

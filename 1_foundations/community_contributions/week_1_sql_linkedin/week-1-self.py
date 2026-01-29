@@ -28,9 +28,9 @@ else:
 
 
 def push(message):
-  print(f"Push: {message}")
-  payload = {"user": pushover_user, "token": pushover_token, "message": message}
-  requests.post(pushover_url, data=payload)
+    print(f"Push: {message}")
+    payload = {"user": pushover_user, "token": pushover_token, "message": message}
+    requests.post(pushover_url, data=payload)
 
 
 def record_user_details(email, name="Name not provided", notes="not provided"):
@@ -41,26 +41,30 @@ def record_user_details(email, name="Name not provided", notes="not provided"):
 def record_unknown_question(question):
     push(f"Recording {question} asked that I couldn't answer")
     answerObj = search_common_questions(question)
-    return {"recorded": "ok", "answer": answerObj["answer"], "found": answerObj["found"]}
+    return {
+        "recorded": "ok",
+        "answer": answerObj["answer"],
+        "found": answerObj["found"],
+    }
 
 
 import os
 import psycopg2
+
 
 def search_common_questions(question):
     # print("Searching AI-matched answer for:", question)
     return ai_match_qa(question)
 
 
-
 def fetch_all_qa():
     try:
         conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            port=os.getenv('DB_PORT', '5432'),
-            database=os.getenv('DB_NAME'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD')
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT", "5432"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
         )
         cursor = conn.cursor()
         cursor.execute("SELECT question, answer FROM qa")
@@ -70,11 +74,15 @@ def fetch_all_qa():
     except Exception as e:
         print(f"Database connection failed: {e}")
         return []
-    
+
+
 def ai_match_qa(user_question):
     qa_pairs = fetch_all_qa()
     if not qa_pairs:
-        return {"answer": "Sorry, there was a technical issue accessing the Q&A database.", "found": False}
+        return {
+            "answer": "Sorry, there was a technical issue accessing the Q&A database.",
+            "found": False,
+        }
 
     # Prepare context for AI
     context = "\n".join([f"Q: {qa['question']}\nA: {qa['answer']}" for qa in qa_pairs])
@@ -90,13 +98,14 @@ def ai_match_qa(user_question):
     """
 
     response = openai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
+        model="gpt-5-mini", messages=[{"role": "user", "content": prompt}]
     )
     answer = response.choices[0].message.content.strip()
-    found = not any(phrase in answer.lower() for phrase in ["i don't know", "sorry", "no answer"])
+    found = not any(
+        phrase in answer.lower() for phrase in ["i don't know", "sorry", "no answer"]
+    )
 
-    return {"answer": answer, "found" : found}
+    return {"answer": answer, "found": found}
 
 
 record_user_details_json = {
@@ -107,21 +116,20 @@ record_user_details_json = {
         "properties": {
             "email": {
                 "type": "string",
-                "description": "The email address of this user"
+                "description": "The email address of this user",
             },
             "name": {
                 "type": "string",
-                "description": "The user's name, if they provided it"
-            }
-            ,
+                "description": "The user's name, if they provided it",
+            },
             "notes": {
                 "type": "string",
-                "description": "Any additional information about the conversation that's worth recording to give context"
-            }
+                "description": "Any additional information about the conversation that's worth recording to give context",
+            },
         },
         "required": ["email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 
@@ -133,12 +141,12 @@ record_unknown_question_json = {
         "properties": {
             "question": {
                 "type": "string",
-                "description": "The question that couldn't be answered"
+                "description": "The question that couldn't be answered",
             },
         },
         "required": ["question"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 search_common_questions_json = {
@@ -149,20 +157,20 @@ search_common_questions_json = {
         "properties": {
             "question": {
                 "type": "string",
-                "description": "The question asked by the user"
+                "description": "The question asked by the user",
             }
         },
         "required": ["question"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 
-tools = [{"type": "function", "function": record_user_details_json},
-        {"type": "function", "function": record_unknown_question_json},
-        {"type": "function", "function": search_common_questions_json}]
-
-
+tools = [
+    {"type": "function", "function": record_user_details_json},
+    {"type": "function", "function": record_unknown_question_json},
+    {"type": "function", "function": search_common_questions_json},
+]
 
 
 def handle_tool_calls(tool_calls):
@@ -170,7 +178,6 @@ def handle_tool_calls(tool_calls):
     for tool_call in tool_calls:
         tool_name = tool_call.function.name
         arguments = json.loads(tool_call.function.arguments)
-     
 
         # THE BIG IF STATEMENT!!!
 
@@ -178,8 +185,15 @@ def handle_tool_calls(tool_calls):
             result = record_user_details(**arguments)
         elif tool_name == "record_unknown_question":
             result = record_unknown_question(**arguments)
-            results.append({"role": "tool","content": json.dumps(result),"tool_call_id": tool_call.id, "resultFromDb": result["found"], "answerFromDb": result["answer"]})
-        
+            results.append(
+                {
+                    "role": "tool",
+                    "content": json.dumps(result),
+                    "tool_call_id": tool_call.id,
+                    "resultFromDb": result["found"],
+                    "answerFromDb": result["answer"],
+                }
+            )
 
     return results
 
@@ -189,14 +203,14 @@ linkedin = ""
 for page in reader.pages:
     text = page.extract_text()
     if text:
-        linkedin += text 
+        linkedin += text
 
 readerResume = PdfReader("resume.pdf")
 
 for page in readerResume.pages:
     text = page.extract_text()
     if text:
-        linkedin += text 
+        linkedin += text
 
 name = "Harsh Bhama"
 
@@ -210,19 +224,19 @@ If the user is engaging in discussion, try to steer them towards getting in touc
 
 system_prompt += f"LinkedIn Profile and Harsh's resume:\n{linkedin}\n\n"
 system_prompt += f"With this context, please chat with the user, always staying in character as {name}."
-    
-
 
 
 def chat(message, history):
-    messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": message}]
+    messages = (
+        [{"role": "system", "content": system_prompt}]
+        + history
+        + [{"role": "user", "content": message}]
+    )
     done = False
     while not done:
         # LLM call
         response = openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            tools=tools
+            model="gpt-5-mini", messages=messages, tools=tools
         )
 
         finish_reason = response.choices[0].finish_reason
@@ -249,13 +263,13 @@ def chat(message, history):
     return final_reply
 
 
-
-
 from pydantic import BaseModel
+
 
 class Evaluation(BaseModel):
     is_acceptable: bool
     feedback: str
+
 
 evaluator_system_prompt = """You are an evaluator that decides whether a response to a question is acceptable. You are provided with a conversation between a User and an Agent. Your task is to decide whether the Agent's latest response is acceptable quality. The Agent is playing the role of Ed Donner and is representing Ed Donner on their website. The Agent has been instructed to be professional and engaging, as if talking to a potential client or future employer who came across the website. The Agent has been provided with context on Harsh Bhama in the form of their resume and LinkedIn details. Here's the information:
 ## LinkedIn Profile and Resume:
@@ -264,7 +278,9 @@ evaluator_system_prompt += f"\n\n## Conversation:\n{{conversation}}\n\n"
 
 
 def evaluator_user_prompt(reply, message, history):
-    user_prompt = f"Here's the conversation between the User and the Agent: \n\n{history}\n\n"
+    user_prompt = (
+        f"Here's the conversation between the User and the Agent: \n\n{history}\n\n"
+    )
     user_prompt += f"Here's the latest message from the User: \n\n{message}\n\n"
     user_prompt += f"Here's the latest response from the Agent: \n\n{reply}\n\n"
     user_prompt += "Please evaluate the response, replying with whether it is acceptable and your feedback."
@@ -272,42 +288,58 @@ def evaluator_user_prompt(reply, message, history):
 
 
 def evaluate(reply, message, history) -> Evaluation:
-  
-    messages = [{"role": "system", "content": evaluator_system_prompt}] + [{"role": "user", "content": evaluator_user_prompt(reply, message, history)}]
-    response = openai.beta.chat.completions.parse(model="o4-mini", messages=messages, response_format=Evaluation)
+
+    messages = [{"role": "system", "content": evaluator_system_prompt}] + [
+        {"role": "user", "content": evaluator_user_prompt(reply, message, history)}
+    ]
+    response = openai.beta.chat.completions.parse(
+        model="o4-mini", messages=messages, response_format=Evaluation
+    )
     return response.choices[0].message.parsed
 
 
-
 def rerun(reply, message, history, feedback):
-    updated_system_prompt = system_prompt + "\n\n## Previous answer rejected\nYou just tried to reply, but the quality control rejected your reply\n"
+    updated_system_prompt = (
+        system_prompt
+        + "\n\n## Previous answer rejected\nYou just tried to reply, but the quality control rejected your reply\n"
+    )
     updated_system_prompt += f"## Your attempted answer:\n{reply}\n\n"
     updated_system_prompt += f"## Reason for rejection:\n{feedback}\n\n"
-    messages = [{"role": "system", "content": updated_system_prompt}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    messages = (
+        [{"role": "system", "content": updated_system_prompt}]
+        + history
+        + [{"role": "user", "content": message}]
+    )
+    response = openai.chat.completions.create(model="gpt-5-mini", messages=messages)
     return response.choices[0].message.content
-
-
 
 
 def chatN(message, history):
     if "patent" in message:
-        system = system_prompt + "\n\nEverything in your reply needs to be in pig latin - \
+        system = (
+            system_prompt
+            + "\n\nEverything in your reply needs to be in pig latin - \
               it is mandatory that you respond only and entirely in pig latin"
+        )
     else:
         system = system_prompt
-    messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
-    reply =response.choices[0].message.content
+    messages = (
+        [{"role": "system", "content": system}]
+        + history
+        + [{"role": "user", "content": message}]
+    )
+    response = openai.chat.completions.create(model="gpt-5-mini", messages=messages)
+    reply = response.choices[0].message.content
 
     evaluation = evaluate(reply, message, history)
-    
+
     if evaluation.is_acceptable:
         print("Passed evaluation - returning reply")
     else:
         print("Failed evaluation - retrying")
         print(evaluation.feedback)
-        reply = rerun(reply, message, history, evaluation.feedback)       
+        reply = rerun(reply, message, history, evaluation.feedback)
     return reply
+
 
 gr.ChatInterface(chat, type="messages").launch()

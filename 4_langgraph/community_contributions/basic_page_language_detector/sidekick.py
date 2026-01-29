@@ -17,6 +17,7 @@ from sidekick_tools import setup_playwright, all_tools
 
 load_dotenv(override=True)
 
+
 class State(TypedDict):
     messages: Annotated[List[Any], add_messages]
     success_criteria: str
@@ -29,15 +30,22 @@ class State(TypedDict):
     worker_iteration: int
     language_worker_iteration: int
 
+
 class EvaluatorOutput(BaseModel):
     feedback: str = Field(description="Feedback on the assistant's response")
-    success_criteria_met: bool = Field(description="Whether the success criteria have been met")
+    success_criteria_met: bool = Field(
+        description="Whether the success criteria have been met"
+    )
     user_input_needed: bool = Field(
         description="True if more input is needed from the user, or clarifications, or the assistant is stuck"
     )
 
+
 class ManagerOutput(BaseModel):
-    delegated_to: str = Field(description="LLM name to which task is directed to, possible options: language_worker, worker")
+    delegated_to: str = Field(
+        description="LLM name to which task is directed to, possible options: language_worker, worker"
+    )
+
 
 class Sidekick:
     def __init__(self):
@@ -51,26 +59,30 @@ class Sidekick:
         self.sidekick_id = str(uuid.uuid4())
         self.memory = MemorySaver()
         self.browser = None
-       
+
     async def setup(self):
         self.tools, self.browser = await setup_playwright()
         self.tools += await all_tools()
         self.tools_indexed = {tool.name: tool for tool in self.tools}
-        manager_llm = ChatOpenAI(model="gpt-4o-mini")
-        self.manager_llm_with_structured_output = manager_llm.with_structured_output(ManagerOutput)
-        worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        manager_llm = ChatOpenAI(model="gpt-5-mini")
+        self.manager_llm_with_structured_output = manager_llm.with_structured_output(
+            ManagerOutput
+        )
+        worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.worker_llm_with_tools = worker_llm.bind_tools(self.tools)
-        language_worker_llm = ChatOpenAI(model="gpt-4o-mini")
+        language_worker_llm = ChatOpenAI(model="gpt-5-mini")
         self.language_worker_llm_with_tools = language_worker_llm.bind_tools(self.tools)
-        evaluator_llm = ChatOpenAI(model="gpt-4o-mini")
-        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(EvaluatorOutput)
+        evaluator_llm = ChatOpenAI(model="gpt-5-mini")
+        self.evaluator_llm_with_output = evaluator_llm.with_structured_output(
+            EvaluatorOutput
+        )
         await self.build_graph()
 
     def manager(self, state: State) -> State:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         system_message = f"""
         You are a helpful assistant that based on provided by user success criteria: {state["success_criteria"]} and message: {self.format_conversation(state["messages"])},
-        you are able to determine what kind of llm to assign the task to. 
+        you are able to determine what kind of llm to assign the task to.
         You have two choices:
         - language_worker dedicated to detect page language specializing in using tool: {self.tools_indexed['page_lang_detector']}
         - regular worker assigned with the rest of tasks that can use all tools: {", ".join(list(self.tools_indexed.keys()))}
@@ -81,9 +93,7 @@ class Sidekick:
         messages = [m for m in messages if not isinstance(m, SystemMessage)]
         messages.insert(0, SystemMessage(content=system_message))
         manager_response = self.manager_llm_with_structured_output.invoke(messages)
-        return  {
-            "delegated_to": manager_response.delegated_to
-        }
+        return {"delegated_to": manager_response.delegated_to}
 
     def language_worker(self, state: State) -> State:
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -114,11 +124,13 @@ class Sidekick:
                 """
         if state.get("input_csv_file") and os.path.exists(state["input_csv_file"]):
             try:
-                csv_snippet = self.tools_indexed['read_csv_snippet'](state["input_csv_file"])
+                csv_snippet = self.tools_indexed["read_csv_snippet"](
+                    state["input_csv_file"]
+                )
                 system_message += f"\nInput CSV snippet for context:\n{csv_snippet}\n"
             except Exception as e:
                 system_message += f"\n[Failed to read CSV snippet: {e}]\n"
-        
+
         messages = state["messages"]
         messages = [m for m in messages if not isinstance(m, SystemMessage)]
         messages.insert(0, SystemMessage(content=system_message))
@@ -127,7 +139,7 @@ class Sidekick:
         # Return updated state
         return {
             "messages": [response],
-             "language_worker_iteration": state["language_worker_iteration"] + 1
+            "language_worker_iteration": state["language_worker_iteration"] + 1,
         }
 
     def worker(self, state: State) -> Dict[str, Any]:
@@ -139,7 +151,7 @@ class Sidekick:
             Here is a full list {", ".join(list(self.tools_indexed.keys()))}
             Current time: {current_time}
             Success criteria: {state["success_criteria"]}
-            Reply either with a question for the user (clearly labeled 'Question: ...') or the final answer. 
+            Reply either with a question for the user (clearly labeled 'Question: ...') or the final answer.
             Do not ask a question if you have finished.
             Do not ask questions if you did not fulfil success criteria.Check well success criteria and fullfill them
             As a response if you need to create csv file upload it in the following folder {state["output_folder"]} and name it result.csv.
@@ -158,7 +170,9 @@ class Sidekick:
                 """
         if state.get("input_csv_file") and os.path.exists(state["input_csv_file"]):
             try:
-                csv_snippet = self.tools_indexed['read_csv_snippet'](state["input_csv_file"])
+                csv_snippet = self.tools_indexed["read_csv_snippet"](
+                    state["input_csv_file"]
+                )
                 system_message += f"\nInput CSV snippet for context:\n{csv_snippet}\n"
             except Exception as e:
                 system_message += f"\n[Failed to read CSV snippet: {e}]\n"
@@ -168,7 +182,7 @@ class Sidekick:
         response = self.worker_llm_with_tools.invoke(messages)
         return {
             "messages": [response],
-            "worker_iteration": state["worker_iteration"] + 1
+            "worker_iteration": state["worker_iteration"] + 1,
         }
 
     def workers_router(self, state: State) -> str:
@@ -179,15 +193,14 @@ class Sidekick:
         else:
             return "evaluator"
 
-
     def tool_router(self, state: State) -> str:
         return state["delegated_to"] or "worker"
 
     def manager_router(self, state: State) -> str:
-        if state["delegated_to"] == 'worker':
-            return 'worker'
+        if state["delegated_to"] == "worker":
+            return "worker"
         else:
-            return 'language_worker'
+            return "language_worker"
 
     def format_conversation(self, messages: List[Any]) -> str:
         conversation = "Conversation history:\n\n"
@@ -223,7 +236,7 @@ class Sidekick:
             HumanMessage(content=user_message),
         ]
         eval_result = self.evaluator_llm_with_output.invoke(evaluator_messages)
-        return  {
+        return {
             "feedback": eval_result.feedback,
             "success_criteria_met": eval_result.success_criteria_met,
             "user_input_needed": eval_result.user_input_needed,
@@ -249,33 +262,44 @@ class Sidekick:
         graph_builder.add_node("evaluator", self.evaluator)
         graph_builder.add_edge(START, "manager")
         graph_builder.add_conditional_edges(
-            "manager", self.manager_router, {"worker": "worker", "language_worker": "language_worker"}
+            "manager",
+            self.manager_router,
+            {"worker": "worker", "language_worker": "language_worker"},
         )
         graph_builder.add_conditional_edges(
             "worker", self.workers_router, {"tools": "tools", "evaluator": "evaluator"}
         )
         graph_builder.add_conditional_edges(
-            "language_worker", self.workers_router, {"tools": "tools", "evaluator": "evaluator"}
+            "language_worker",
+            self.workers_router,
+            {"tools": "tools", "evaluator": "evaluator"},
         )
         graph_builder.add_conditional_edges(
-            "tools", self.tool_router, {"worker": "worker", "language_worker": "language_worker" }
+            "tools",
+            self.tool_router,
+            {"worker": "worker", "language_worker": "language_worker"},
         )
         graph_builder.add_conditional_edges(
-            "evaluator", self.route_based_on_evaluation, {"worker": "worker","language_worker":"language_worker", "END": END }
+            "evaluator",
+            self.route_based_on_evaluation,
+            {"worker": "worker", "language_worker": "language_worker", "END": END},
         )
         self.graph = graph_builder.compile(checkpointer=self.memory)
 
-    async def run_superstep(self, message, success_criteria, history, input_csv_file, output_folder):
+    async def run_superstep(
+        self, message, success_criteria, history, input_csv_file, output_folder
+    ):
         config = {"configurable": {"thread_id": self.sidekick_id}}
 
         if isinstance(message, str):
             messages = [HumanMessage(content=message)]
         else:
             messages = message
-        
+
         state = {
             "messages": messages,
-            "success_criteria": success_criteria or "The answer should be clear and accurate",
+            "success_criteria": success_criteria
+            or "The answer should be clear and accurate",
             "feedback": None,
             "success_criteria_met": False,
             "user_input_needed": False,
@@ -288,19 +312,17 @@ class Sidekick:
         state = await self.graph.ainvoke(state, config=config)
         user = {"role": "user", "content": message}
         last_ai = next(
-            m for m in reversed(state["messages"])
+            m
+            for m in reversed(state["messages"])
             if isinstance(m, AIMessage) and not getattr(m, "tool_calls", None)
         )
-        reply = {
-            "role": "assistant",
-            "content": last_ai.content
-        }
-        feedback = {
-            "role": "assistant",
-            "content": state.get("feedback")
-        }
+        reply = {"role": "assistant", "content": last_ai.content}
+        feedback = {"role": "assistant", "content": state.get("feedback")}
         output_file_path = os.path.join(output_folder, "result.csv")
-        if not os.path.exists(output_file_path) or os.path.getsize(output_file_path) == 0:
+        if (
+            not os.path.exists(output_file_path)
+            or os.path.getsize(output_file_path) == 0
+        ):
             output_file_path = None
         return history + [user, reply, feedback], output_file_path
 
@@ -311,8 +333,10 @@ class Sidekick:
                 loop.create_task(self.browser.close())
             except RuntimeError:
                 asyncio.run(self.browser.close())
-              
+
+
 if __name__ == "__main__":
+
     async def main():
         sidekick = Sidekick()
         await sidekick.setup()
@@ -320,9 +344,9 @@ if __name__ == "__main__":
         result = await sidekick.run_superstep(
             "What is the temperature in Krakow Poland",
             "Tell which tool you used",
-            [], 
-            "", 
-            ""
+            [],
+            "",
+            "",
         )
 
         print(result)
@@ -331,4 +355,3 @@ if __name__ == "__main__":
         sidekick.cleanup()
 
     asyncio.run(main())
-    

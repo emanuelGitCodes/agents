@@ -9,10 +9,11 @@ from pypdf import PdfReader
 import gradio as gr
 import asyncio
 
+
 def read_pdf_file() -> Optional[str]:
     """
     Read and extract text from a PDF file located in the same directory as this script.
-    
+
     Returns:
         Optional[str]: The extracted text content if successful, None if there's an error
     """
@@ -20,34 +21,37 @@ def read_pdf_file() -> Optional[str]:
         # Get the current directory where the script is located
         current_dir = Path(__file__).parent
         pdf_path = current_dir / "book_proposal.pdf"
-        
+
         # Check if file exists
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF file not found at: {pdf_path}")
-        
+
         # Create a PDF reader object
         reader = PdfReader(pdf_path)
-        
+
         # Get the number of pages
         num_pages = len(reader.pages)
         print(f"Total number of pages: {num_pages}")
-        
+
         # Read all pages using list comprehension for better performance
         text_content = " ".join(page.extract_text() for page in reader.pages)
-            
+
         return text_content
-        
+
     except Exception as e:
         print(f"Error reading PDF file: {str(e)}")
         return None
 
+
 def create_agent(prompt: str) -> Agent:
-    agent = Agent(name="Book Reviewer", instructions=prompt, model="gpt-4o-mini")
+    agent = Agent(name="Book Reviewer", instructions=prompt, model="gpt-5-mini")
     return agent
+
 
 async def chat(message, history):
     result = await Runner.run(openai_agent, message)
     return result.final_output
+
 
 async def main():
     content = read_pdf_file()

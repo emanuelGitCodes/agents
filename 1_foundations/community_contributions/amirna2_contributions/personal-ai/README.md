@@ -198,8 +198,8 @@ config = ChatbotConfig(
     resume_path="me/resume.pdf",
     linkedin_path="me/linkedin.pdf",
     summary_path="me/summary.txt",
-    model="gpt-4o-mini-2024-07-18",
-    evaluator_model="gemini-2.5-flash",
+    model="gpt-5-mini-2024-07-18",
+    evaluator_model="gemini-3-flash-preview",
     job_matching_model="gpt-4o-2024-08-06",
     job_match_threshold="Good"
 )

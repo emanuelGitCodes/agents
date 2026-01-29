@@ -19,6 +19,7 @@ pushover_user = os.getenv("PUSHOVER_USER")
 pushover_url = "https://api.pushover.net/1/messages.json"
 serper = GoogleSerperAPIWrapper()
 
+
 async def playwright_tools():
     playwright = await async_playwright().start()
     browser = await playwright.chromium.launch(headless=False)
@@ -28,7 +29,10 @@ async def playwright_tools():
 
 def push(text: str):
     """Send a push notification to the user"""
-    requests.post(pushover_url, data = {"token": pushover_token, "user": pushover_user, "message": text})
+    requests.post(
+        pushover_url,
+        data={"token": pushover_token, "user": pushover_user, "message": text},
+    )
     return "success"
 
 
@@ -41,8 +45,11 @@ from langchain_experimental.tools import PythonREPLTool
 from pydantic import Field
 import os
 
+
 class SandboxPythonREPLTool(PythonREPLTool):
-    sandbox_path: str = Field(default="./sandbox", description="Directory to run REPL code in")
+    sandbox_path: str = Field(
+        default="./sandbox", description="Directory to run REPL code in"
+    )
 
     def _run(self, query: str) -> str:
         """Run synchronously, changing cwd to sandbox."""
@@ -58,6 +65,7 @@ class SandboxPythonREPLTool(PythonREPLTool):
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self._run, query)
 
+
 code_review_agent = Agent(
     name="Code Review Agent",
     instructions="""You are an expert code reviewer. Your job is to review code for:
@@ -68,28 +76,35 @@ code_review_agent = Agent(
     - Readability and maintainability (follow PEP 8 guidelines)
     - Proper error handling
     - Ensure type hinting and proper documentation is included
-    
+
     You should return the code with the improvements as your final output.""",
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
 )
-    
+
+
 async def review_code_async(code: str) -> str:
     """Review code using the code review agent."""
     result = await Runner.run(code_review_agent, f"Please review this code:\n\n{code}")
     return result.final_output  # or however you extract the response
+
+
 def review_code_sync(code: str) -> str:
     """Sync wrapper - not used in async context."""
     return "Use async version"
 
 
 async def other_tools():
-    push_tool = Tool(name="send_push_notification", func=push, description="Use this tool when you want to send a push notification")
+    push_tool = Tool(
+        name="send_push_notification",
+        func=push,
+        description="Use this tool when you want to send a push notification",
+    )
     file_tools = get_file_tools()
 
-    tool_search =Tool(
+    tool_search = Tool(
         name="search",
         func=serper.run,
-        description="Use this tool when you want to get the results of an online web search"
+        description="Use this tool when you want to get the results of an online web search",
     )
 
     wikipedia = WikipediaAPIWrapper()
@@ -99,7 +114,7 @@ async def other_tools():
     python_repl.description += (
         " It can also use subprocess and 'uv run' commands for shell operations."
         """ You can check the list of installed packages doing "import subprocess; subprocess.run(['uv', 'pip' 'list'])" """
-        "Use installed packages before adding new ones with uv add package-name." 
+        "Use installed packages before adding new ones with uv add package-name."
         "For example, use Plotly for visualizations and pandas for data analysis."
     )
 
@@ -107,8 +122,13 @@ async def other_tools():
         name="code_review",
         func=review_code_sync,
         coroutine=review_code_async,
-        description="Use this tool to review code quality, identify bugs, security issues, and get suggestions for improvement. Pass the code as a string."
+        description="Use this tool to review code quality, identify bugs, security issues, and get suggestions for improvement. Pass the code as a string.",
     )
 
-    return file_tools + [push_tool, tool_search, python_repl,  wiki_tool, code_review_tool]
-
+    return file_tools + [
+        push_tool,
+        tool_search,
+        python_repl,
+        wiki_tool,
+        code_review_tool,
+    ]

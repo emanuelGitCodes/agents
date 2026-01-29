@@ -23,7 +23,7 @@ This will:
 - Create the `hidden_gems_output/` directory
 - Generate 5 continent guide files (africa_guide.md, asia_guide.md, europe_guide.md, americas_guide.md, oceania_guide.md)
 - Each guide contains 3 countries with 10 sites per country (15 countries total)
-- Uses OpenAI `gpt-5-nano` to generate the content
+- Uses OpenAI `gpt-5-mini` to generate the content
 
 **Note:** This requires an OpenAI API key in your `.env` file and will make API calls to generate the guides.
 
@@ -36,7 +36,7 @@ python app.py
 The app will:
 - Load and index the markdown guides from `hidden_gems_output/`
 - Start a Gradio chat interface
-- Use OpenAI `gpt-5-nano` for retrieval and answering
+- Use OpenAI `gpt-5-mini` for retrieval and answering
 - Use Anthropic `claude-sonnet-4-5` for evaluation and auto-retry
 
 ## Environment Variables

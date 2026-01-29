@@ -41,7 +41,7 @@ For each vulnerability provide:
 Prioritize by exploitability, severity, and ease of fix. Be practical.
 """
 
-    def __init__(self, model: str = "gpt-4o-mini"):
+    def __init__(self, model: str = "gpt-5-mini"):
         self.model = model
         self.agent = self._create_agent()
         logger.info("RemediationAdvisorAgent initialized with WebSearchTool")
@@ -56,7 +56,9 @@ Prioritize by exploitability, severity, and ease of fix. Be practical.
             output_type=RemediationPlans,
         )
 
-    async def advise(self, analyzed_vulns: List[AnalyzedVulnerability]) -> RemediationPlans:
+    async def advise(
+        self, analyzed_vulns: List[AnalyzedVulnerability]
+    ) -> RemediationPlans:
         """
         Generate remediation plans for analyzed vulnerabilities.
 
@@ -69,7 +71,9 @@ Prioritize by exploitability, severity, and ease of fix. Be practical.
         if not analyzed_vulns:
             return self._create_empty_plans()
 
-        logger.info(f"Creating remediation plans for {len(analyzed_vulns)} vulnerabilities")
+        logger.info(
+            f"Creating remediation plans for {len(analyzed_vulns)} vulnerabilities"
+        )
 
         vulns_json = json.dumps([v.model_dump() for v in analyzed_vulns], indent=2)
 

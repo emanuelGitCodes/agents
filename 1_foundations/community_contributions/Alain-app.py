@@ -15,6 +15,7 @@ load_dotenv(override=True)
 
 my_name = "Alain Veuve"
 
+
 def push(text):
     try:
         requests.post(
@@ -34,19 +35,29 @@ def record_user_details(email, name="Name not provided", notes="not provided"):
     push(f"Recording {name} with email {email} and notes {notes}")
     return {"recorded": "ok"}
 
+
 record_user_details_json = {
     "name": "record_user_details",
     "description": "Use this tool to record that a user is interested in being in touch and provided an email address",
     "parameters": {
         "type": "object",
         "properties": {
-            "email": {"type": "string", "description": "The email address of this user"},
-            "name": {"type": "string", "description": "The user's name, if they provided it"},
-            "notes": {"type": "string", "description": "Any additional information about the conversation that's worth recording to give context"},
+            "email": {
+                "type": "string",
+                "description": "The email address of this user",
+            },
+            "name": {
+                "type": "string",
+                "description": "The user's name, if they provided it",
+            },
+            "notes": {
+                "type": "string",
+                "description": "Any additional information about the conversation that's worth recording to give context",
+            },
         },
         "required": ["email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 record_unknown_question_json = {
@@ -55,13 +66,20 @@ record_unknown_question_json = {
     "parameters": {
         "type": "object",
         "properties": {
-            "question": {"type": "string", "description": "The question that couldn't be answered"},
-            "email": {"type": "string", "description": "The email address of the user asking the question"},
+            "question": {
+                "type": "string",
+                "description": "The question that couldn't be answered",
+            },
+            "email": {
+                "type": "string",
+                "description": "The email address of the user asking the question",
+            },
         },
         "required": ["question", "email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
+
 
 def record_unknown_question(question, email):
     # Format the string to include both the question and the email
@@ -69,17 +87,20 @@ def record_unknown_question(question, email):
     push(notification_text)
     return {"recorded": "ok"}
 
-#def record_general_inquiry(inquiry, email):
+
+# def record_general_inquiry(inquiry, email):
 #    # Format the notification for general/availability questions
 #    notification_text = f" New Inquiry/Availability Check:\nMessage: {inquiry}\n User Email: {email}"
 #    push(notification_text)
 #    return {"recorded": "ok"}
+
 
 def record_unknown_question(question, email):
     # This builds the message for Pushover
     notification_text = f" Unanswered Question: {question}\n User Email: {email}"
     push(notification_text)
     return {"recorded": "ok"}
+
 
 def record_general_inquiry(inquiry, email):
     # This builds the message for Pushover
@@ -94,12 +115,15 @@ record_general_inquiry_json = {
     "parameters": {
         "type": "object",
         "properties": {
-            "inquiry": {"type": "string", "description": "The user's question or message regarding the project or availability"},
+            "inquiry": {
+                "type": "string",
+                "description": "The user's question or message regarding the project or availability",
+            },
             "email": {"type": "string", "description": "The user's email address"},
         },
         "required": ["inquiry", "email"],
-        "additionalProperties": False
-    }
+        "additionalProperties": False,
+    },
 }
 
 tools = [
@@ -144,24 +168,26 @@ class Me:
             print(f"[tools] Called: {tool_name} | args: {arguments}", flush=True)
             tool = globals().get(tool_name)
             result = tool(**arguments) if tool else {}
-            results.append({
-                "role": "tool",
-                "content": json.dumps(result),
-                "tool_call_id": tool_call.id
-            })
+            results.append(
+                {
+                    "role": "tool",
+                    "content": json.dumps(result),
+                    "tool_call_id": tool_call.id,
+                }
+            )
         return results
 
     def system_prompt(self):
-        
+
         system_prompt = (
             f"You are acting as {self.name}, answering questions on your website about your career and experience. "
-            f"Represent {self.name} faithfully, professionally, and engagingly.\n\n"            
+            f"Represent {self.name} faithfully, professionally, and engagingly.\n\n"
             f"**CRITICAL TOOL RULES:**\n"
             f"1. **Unknown Questions:** If you don't know an answer, you MUST ask for the user's email. Once they provide it, use `record_unknown_question` with both the question and email.\n"
             f"2. **Project Inquiries:** If the user asks about project availability, starting a project soon, or hiring you, you MUST ask for their email. Once provided, use `record_general_inquiry` with their inquiry and email.\n"
             f"3. **General Contact:** If a user just wants to leave their contact info or stay in touch without a specific question, use `record_user_details`.\n\n"
             f"Privacy: Only collect email for follow-up. Do not store sensitive data."
-)
+        )
 
         system_prompt += f"\n\n## Summary:\n{self.summary}\n\n## LinkedIn Profile:\n{self.myprofile}\n\n"
         system_prompt += f"With this context, continue the conversation, always staying in character as {self.name}."
@@ -169,11 +195,15 @@ class Me:
 
     def chat(self, message, history):
         # history from gradio(type="messages") should already be [{"role": "...", "content": "..."}]
-        messages = [{"role": "system", "content": self.system_prompt()}] + history + [{"role": "user", "content": message}]
+        messages = (
+            [{"role": "system", "content": self.system_prompt()}]
+            + history
+            + [{"role": "user", "content": message}]
+        )
         while True:
             try:
                 response = self.openai.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-5-mini",
                     messages=messages,
                     tools=tools,
                     tool_choice="auto",
@@ -181,7 +211,9 @@ class Me:
                 )
             except Exception as e:
                 print(f"[chat] API error: {e}", flush=True)
-                return "Sorry, I ran into an error calling the model. Check server logs."
+                return (
+                    "Sorry, I ran into an error calling the model. Check server logs."
+                )
 
             choice = response.choices[0]
             assistant_msg = choice.message
@@ -190,7 +222,9 @@ class Me:
             if getattr(assistant_msg, "tool_calls", None):
                 tool_calls = assistant_msg.tool_calls
                 results = self.handle_tool_call(tool_calls)
-                messages.append({"role": "assistant", "content": None, "tool_calls": tool_calls})
+                messages.append(
+                    {"role": "assistant", "content": None, "tool_calls": tool_calls}
+                )
                 messages.extend(results)
                 # loop to let the model see tool outputs
                 continue
@@ -202,4 +236,8 @@ class Me:
 if __name__ == "__main__":
     me = Me()
     # Launch ONLY ONE interface here
-    gr.ChatInterface(me.chat, type="messages", title=f"Hi, I am {my_name}'s Linkedin Profile Assistant. How can I help you today?").launch()
+    gr.ChatInterface(
+        me.chat,
+        type="messages",
+        title=f"Hi, I am {my_name}'s Linkedin Profile Assistant. How can I help you today?",
+    ).launch()

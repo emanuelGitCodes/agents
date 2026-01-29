@@ -2,17 +2,17 @@
 
 This is an overview of my **SidekickAI** project, available at the following link.
 
-🔗 **GitHub Repository:**  
+🔗 **GitHub Repository:**
 https://github.com/Jsrodrigue/sidekickAI
 
-SidekickAI is a personal AI assistant designed to **enhance productivity and knowledge management** through persistent, structured conversations and isolated contexts.  
+SidekickAI is a personal AI assistant designed to **enhance productivity and knowledge management** through persistent, structured conversations and isolated contexts.
 You can **create and use folder-based knowledge bases**, or **use the chat as a general assistant without selecting any folder**.
 
 ---
 
 ## Overview
 
-SidekickAI introduces a **folder-based knowledge system** where each folder represents an independent workspace.  
+SidekickAI introduces a **folder-based knowledge system** where each folder represents an independent workspace.
 At the same time, the system can be used **without any folder**, behaving like a standard AI assistant.
 
 When folders are used:
@@ -84,9 +84,9 @@ Click the image below to watch a full demo of **SidekickAI** on YouTube:
 
 ## Models and AI Stack
 
-- **Chat Model:** `gpt-4o-mini`  
+- **Chat Model:** `gpt-5-mini`
   Selected to balance cost efficiency with strong reasoning and tool usage.
-- **Embedding Model:** `text-embedding-ada-002`  
+- **Embedding Model:** `text-embedding-ada-002`
   Used for semantic indexing and document retrieval.
 - **Frameworks:**
   - LangGraph for agent orchestration
@@ -157,11 +157,11 @@ SidekickAI uses a **simple and extensible agent loop** built with LangGraph.
 
 ### Control Flow
 
-1. START → Worker  
+1. START → Worker
 2. Worker:
    - Tool calls present → Tool Node
-   - No tool calls → END  
-3. Tools → Worker  
+   - No tool calls → END
+3. Tools → Worker
 4. Worker → END when no further actions are required
 
 ### Key Design Decisions

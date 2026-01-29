@@ -39,11 +39,11 @@ def get_path_generator_mcp_servers():
 async def generate_learning_path(goal: str, level: str = "beginner") -> dict:
     """
     Generate a learning path dynamically by searching for resources.
-    
+
     Args:
         goal: Learning goal (e.g., "Learn Python", "Web Development")
         level: Skill level (beginner, intermediate, advanced)
-    
+
     Returns:
         Dictionary with path_id and generated path
     """
@@ -72,7 +72,7 @@ STEP 4: Call update_path_content tool with:
 
 STEP 5: Confirm completion by stating the path_id.
 
-IMPORTANT: 
+IMPORTANT:
 - You MUST call update_path_content before finishing
 - Be efficient with searches - combine search terms to reduce API calls
 - If rate limited, use the resources you already found and proceed"""
@@ -90,7 +90,7 @@ IMPORTANT:
         agent = Agent(
             name="path_generator",
             instructions=instructions,
-            model="gpt-4o-mini",
+            model="gpt-5-mini",
             mcp_servers=mcp_servers,
         )
 
@@ -107,37 +107,41 @@ IMPORTANT: If you encounter rate limit errors, proceed with the resources you've
 
         # Generate trace ID and use it
         trace_id = gen_trace_id()
-        
+
         with trace("path_generation", trace_id=trace_id):
-            print(f"Starting path generation. Trace: https://platform.openai.com/traces/trace?trace_id={trace_id}")
+            print(
+                f"Starting path generation. Trace: https://platform.openai.com/traces/trace?trace_id={trace_id}"
+            )
             result = await Runner.run(agent, prompt, max_turns=40)
             print(f"Agent completed. Final output: {result.final_output[:200]}...")
 
         # Wait a moment for any async operations to complete
         await asyncio.sleep(1)
-        
+
         # Get the most recent path for this goal/level
         from learning_data import get_all_paths
-        
+
         all_paths = get_all_paths()
         latest_path = None
         latest_time = None
-        
+
         for path_id, path in all_paths.items():
-            if (path.get('goal', '').lower() == goal.lower() and 
-                path.get('level') == level):
-                created_at = path.get('created_at', '')
+            if (
+                path.get("goal", "").lower() == goal.lower()
+                and path.get("level") == level
+            ):
+                created_at = path.get("created_at", "")
                 if not latest_time or created_at > latest_time:
                     latest_time = created_at
                     latest_path = path_id
-        
+
         trace_url = f"https://platform.openai.com/traces/trace?trace_id={trace_id}"
-        
+
         return {
             "path_id": latest_path,
             "result": result.final_output,
             "trace_id": trace_id,
-            "trace_url": trace_url
+            "trace_url": trace_url,
         }
 
 
@@ -150,4 +154,3 @@ if __name__ == "__main__":
         print(result)
 
     asyncio.run(test())
-

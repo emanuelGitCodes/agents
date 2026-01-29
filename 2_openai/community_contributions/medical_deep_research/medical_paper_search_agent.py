@@ -16,7 +16,7 @@ def search_medical_papers(query: str, limit: int = 5) -> Dict:
         params = {
             "query": query,
             "limit": limit,
-            "fields": "title,abstract,authors,year,venue,citationCount,url,externalIds"
+            "fields": "title,abstract,authors,year,venue,citationCount,url,externalIds",
         }
         response = requests.get(SEMANTIC_SCHOLAR_API, params=params, timeout=10)
         response.raise_for_status()
@@ -48,7 +48,6 @@ medical_search_agent = Agent(
     name="MedicalSearchAgent",
     instructions=INSTRUCTIONS,
     tools=[search_medical_papers],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     model_settings=ModelSettings(tool_choice="required"),
 )
-

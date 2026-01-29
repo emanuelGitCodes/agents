@@ -5,10 +5,10 @@ from pydantic import BaseModel, Field
 from agents import Agent
 
 
-class InstructionDesignerInstructions():
+class InstructionDesignerInstructions:
     def name(self):
         return "instruction_designer"
-    
+
     def instructions(self):
         return (
             "You are an instructional designer agent. Your job is to turn curriculum outlines into engaging,"
@@ -20,18 +20,20 @@ class InstructionDesignerInstructions():
             "Keep tone aligned with the course level (beginner, intermediate, expert)."
             "Do not generate quizzes or assessments. Pass structured lessons to the next agent."
         )
-    
+
     def handoff_description(self):
         return self.instructions()
-    
-    def model(self) -> Literal["gpt-4o-mini", "gpt-4o"]:
-        return "gpt-4o-mini"
-    
+
+    def model(self) -> Literal["gpt-5-mini", "gpt-4o"]:
+        return "gpt-5-mini"
+
+
 class Instruction(BaseModel):
     title: str = Field(description="The title of the instruction")
     description: str = Field(description="The description of the instruction")
 
-class InstructionDesignerAgent():
+
+class InstructionDesignerAgent:
     def __init__(self):
         instructions = InstructionDesignerInstructions()
         self.agent = Agent(
@@ -41,7 +43,10 @@ class InstructionDesignerAgent():
             handoff_description=instructions.handoff_description(),
             output_type=Instruction,
         )
-    
+
     def as_tool(self):
         instructions = InstructionDesignerInstructions()
-        return self.agent.as_tool(tool_name=instructions.name(), tool_description=instructions.handoff_description())
+        return self.agent.as_tool(
+            tool_name=instructions.name(),
+            tool_description=instructions.handoff_description(),
+        )

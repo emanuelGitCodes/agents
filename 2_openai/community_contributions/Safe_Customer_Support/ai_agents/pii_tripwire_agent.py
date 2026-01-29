@@ -1,10 +1,11 @@
 from agents import Agent
 
+
 class PIITripwireAgent:
     def __init__(self):
         self.agent = Agent(
             name="PII Tripwire Agent",
-            model="gpt-4o-mini",
+            model="gpt-5-mini",
             instructions=(
                 "You are the PII Tripwire Agent. You take over whenever "
                 "a safety or policy violation occurs (for example, if PII was detected). "

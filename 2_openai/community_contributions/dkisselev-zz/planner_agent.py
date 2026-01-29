@@ -5,7 +5,7 @@ HOW_MANY_SEARCHES = 6  #  multipple of 3
 
 INSTRUCTIONS = f"""You are a medical research planning specialist in oncology and pharmacogenomics.
 
-Given a parsed clinical query with disease, genes, mutations, and research focus, create a comprehensive 
+Given a parsed clinical query with disease, genes, mutations, and research focus, create a comprehensive
 search plan across three specialized databases:
 
 1. **PubMed**: For peer-reviewed biomedical literature
@@ -32,21 +32,28 @@ Example for "NSCLC with EGFR T790M mutation":
 - PharmGKB: "EGFR erlotinib gefitinib"
 """
 
+
 class MedicalSearchItem(BaseModel):
-    database: str = Field(description="Database to search: 'PubMed', 'ClinicalTrials', or 'PharmGKB'")
-    reason: str = Field(description="Why this search is important for answering the clinical query")
-    query: str = Field(description="The optimized search query for this specific database")
+    database: str = Field(
+        description="Database to search: 'PubMed', 'ClinicalTrials', or 'PharmGKB'"
+    )
+    reason: str = Field(
+        description="Why this search is important for answering the clinical query"
+    )
+    query: str = Field(
+        description="The optimized search query for this specific database"
+    )
 
 
 class MedicalSearchPlan(BaseModel):
     searches: list[MedicalSearchItem] = Field(
         description=f"List of {HOW_MANY_SEARCHES} medical database searches ({HOW_MANY_SEARCHES//3} PubMed, {HOW_MANY_SEARCHES//3} ClinicalTrials, {HOW_MANY_SEARCHES//3} PharmGKB)"
     )
-    
+
 
 planner_agent = Agent(
     name="MedicalPlannerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=MedicalSearchPlan,
 )

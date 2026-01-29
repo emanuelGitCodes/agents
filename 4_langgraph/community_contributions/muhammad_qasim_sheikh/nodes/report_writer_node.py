@@ -2,10 +2,12 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from state import ResearchState
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
+llm = ChatOpenAI(model="gpt-5-mini", temperature=0.2)
+
 
 class ReportResult(BaseModel):
     report: str = Field(description="A structured research report.")
+
 
 def report_writer_node(state: ResearchState) -> ResearchState:
     print("EXECUTING: WRITER NODE")
@@ -21,7 +23,7 @@ def report_writer_node(state: ResearchState) -> ResearchState:
     Your task is to generate a comprehensive report in markdown format.
 
     **CRITICAL REQUIREMENT: The final report MUST BE at least 1000 words.**
-    
+
     This is a non-negotiable requirement. The report will be automatically rejected if it is shorter.
     You must be verbose, detailed, and expand on all points to meet this length.
     - Start with a detailed outline.

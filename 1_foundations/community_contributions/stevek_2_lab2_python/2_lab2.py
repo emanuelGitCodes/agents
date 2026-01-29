@@ -164,7 +164,7 @@ def call_ollama_model(model: str, prompt: str) -> str:
 # Step 1: generate a single hard question
 # =========================
 
-QUESTION_GENERATOR_MODEL = "gpt-4.1-mini"   # or any OpenAI model you prefer
+QUESTION_GENERATOR_MODEL = "gpt-5-mini"   # or any OpenAI model you prefer
 
 GENERATOR_SYSTEM_PROMPT = (
     "You are a question generation expert. "
@@ -200,9 +200,9 @@ COMPETITORS = [
         "model": "claude-sonnet-4-5",
     },
     {
-        "name": "OpenAI gpt-5-nano",
+        "name": "OpenAI gpt-5-mini",
         "provider": "openai",
-        "model": "gpt-5-nano",
+        "model": "gpt-5-mini",
     },
     {
         "name": "Gemini 2.0-flash",
@@ -246,7 +246,7 @@ def call_competitor(provider: str, model: str, prompt: str) -> str:
 # =========================
 # Step 3: ask all competitors the same question
 # =========================
-  
+
 def collect_competitor_answers(question: str):
     all_answers = []
     for idx, competitor in enumerate(COMPETITORS, start=1):

@@ -18,12 +18,16 @@ INSTRUCTIONS = (
     "Use clear headings, bullet lists, and callouts for key metrics. Make the proposal visually engaging and easy to scan for busy executives."
 )
 
+
 class ProposalDocument(BaseModel):
-    markdown: str = Field(description="A complete markdown document ready for executive review.")
+    markdown: str = Field(
+        description="A complete markdown document ready for executive review."
+    )
+
 
 proposal_agent = Agent(
     name="ProposalAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     output_type=ProposalDocument,
 )

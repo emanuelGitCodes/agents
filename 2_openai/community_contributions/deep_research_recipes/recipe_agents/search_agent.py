@@ -28,6 +28,6 @@ recipe_search_agent = Agent(
     name="RecipeSearchAgent",
     instructions=INSTRUCTIONS,
     tools=[WebSearchTool(search_context_size="low")],
-    model="gpt-4o-mini",
+    model="gpt-5-mini",
     model_settings=ModelSettings(tool_choice="required"),
 )

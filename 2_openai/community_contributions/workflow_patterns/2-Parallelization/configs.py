@@ -22,7 +22,7 @@ class LLMConfig(BaseModel):
 # A simple dictionary is much clearer and more appropriate than a Pydantic Settings class.
 AVAILABLE_LLMS: Dict[str, LLMConfig] = {
     "gemini": LLMConfig(
-        model_name="gemini-2.5-flash",
+        model_name="gemini-3-flash-preview",
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
         api_key_env_var="GOOGLE_API_KEY",
     ),

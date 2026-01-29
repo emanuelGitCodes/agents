@@ -6,13 +6,17 @@ INSTRUCTIONS = (
     "Your summary should highlight the user problem and potential business impact."
 )
 
+
 class Insight(BaseModel):
     user_problem: str = Field(description="The core user pain point or opportunity.")
-    supporting_evidence: list[str] = Field(description="Key facts, quotes, or data that support the problem.")
+    supporting_evidence: list[str] = Field(
+        description="Key facts, quotes, or data that support the problem."
+    )
+
 
 insight_agent = Agent(
     name="InsightAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
-    output_type=Insight
+    model="gpt-5-mini",
+    output_type=Insight,
 )

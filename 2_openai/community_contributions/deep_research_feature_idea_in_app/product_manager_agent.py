@@ -7,13 +7,19 @@ INSTRUCTIONS = (
     "Be precise, concise, and always consider product feasibility and user impact."
 )
 
+
 class ClarifiedFeature(BaseModel):
-    clarified_spec: str = Field(description="A clarified, PM-reviewed version of the feature spec.")
-    pm_questions: list[str] = Field(description="Questions or considerations raised during clarification.")
+    clarified_spec: str = Field(
+        description="A clarified, PM-reviewed version of the feature spec."
+    )
+    pm_questions: list[str] = Field(
+        description="Questions or considerations raised during clarification."
+    )
+
 
 product_manager_agent = Agent(
     name="ProductManagerAgent",
     instructions=INSTRUCTIONS,
-    model="gpt-4o-mini",
-    output_type=ClarifiedFeature
+    model="gpt-5-mini",
+    output_type=ClarifiedFeature,
 )
